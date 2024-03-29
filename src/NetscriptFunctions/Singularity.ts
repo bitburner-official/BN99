@@ -768,6 +768,12 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
       const fac = Factions[facName];
       return [...fac.getInfo().inviteReqs].map((condition) => condition.toJSON());
     },
+    getFactionEnemies: (ctx) => (_facName) => {
+      helpers.checkSingularityAccess(ctx);
+      const facName = getEnumHelper("FactionName").nsGetMember(ctx, _facName);
+      const fac = Factions[facName];
+      return fac.getInfo().enemies.slice();
+    },
     checkFactionInvitations: (ctx) => () => {
       helpers.checkSingularityAccess(ctx);
       // Manually trigger a check for faction invites
