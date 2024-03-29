@@ -19,10 +19,10 @@ export class Skill {
   name: BladeSkillName;
   desc: string;
   // Cost is in Skill Points
-  baseCost = 1;
+  baseCost: number;
   // Additive cost increase per level
-  costInc = 1;
-  maxLvl = Number.MAX_SAFE_INTEGER;
+  costInc: number;
+  maxLvl: number;
   mults: PartialRecord<BladeMultName, number> = {};
 
   constructor(params: SkillParams) {
@@ -30,7 +30,7 @@ export class Skill {
     this.desc = params.desc;
     this.baseCost = params.baseCost ?? 1;
     this.costInc = params.costInc ?? 1;
-    this.maxLvl = params.maxLvl ?? 1;
+    this.maxLvl = params.maxLvl ?? Number.MAX_SAFE_INTEGER;
     for (const [multName, mult] of getRecordEntries(params.mults)) this.mults[multName] = mult;
   }
 
