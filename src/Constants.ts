@@ -200,27 +200,37 @@ export const CONSTANTS: {
 
   // Also update doc/source/changelog.rst
   LatestUpdate: `
-## v2.6.1 dev - last updated 21 Mar 2024
+## v2.6.1 dev - last updated 29 Mar 2024
 
 See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/v2.6.0/src/Documentation/doc/changelog.md
 
+### MAJOR CHANGES
+
+- Exported savegames are now compressed. This means that savegames from 2.6.1dev will need to be manually converted before backloading into 2.6.0 (@catloversg)
+
 ### API
 
+- (Formulas) Add ns.formulas.hacking.growAmount (@d0sboots)
 - (Go) Some changes to the Go API, including some minor breaking changes. Please refer to the API documentation in the script editor or at https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.go.md (@ficocelliguy)
 - (Go) Fix a bug that allowed facing secret opponent early or with wrong board size (@ficoccelliguy)
+- (Singularity) Added ns.singularity.getFactionEnemies function (@jaguardeer)
 - (Sleeve) SleeveInfiltrationWork now has a nextCompletion promise (@Caldwell-74)
+
 
 ### UI
 
+- (Corporation) More granular control of office size increases (@adeilt)
 - (Gang) Fix inaccurate display of wanted reduction rate when performing "justice" tasks (@LJNeon)
 - (Go) Fix an incorrect displayed max favor on Go history page (@ficocelliguy)
+- Text files (.txt and .json) posted to the terminal from the ls command are now clickable (@catloversg)
 - Fixed a display issue on the bitverse page (@LJNeon)
 
 ### MISC
 
+- (Bladeburner) Internal code refactoring (@Snarling)
 - (Go) "No AI" white player can now pass (@ficocelliguy)
 - (Go) Reimplement superko rule, adjust save data (@ficocelliguy)
-- (Go) Balance tweaks (@ficocelliguy)
+- (Go) Balance tweaks and other bugfixes (@ficocelliguy)
 - Update Credits page to show @d0sboots as an active maintainer (@Snarling)
 - Miscellaneous documentation fixes (@adeilt, @User670, @catloversg, @gmcew)
 - Allow .json files (@shyguy1412)
@@ -228,6 +238,7 @@ See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/
 - Disable text translation, which commonly causes crashes (@catloversg)
 - Fix an incorrect unit in ns.spawn logs (@FoGsesipod)
 - Servers that don't exist yet will not show up in autocomplete data (@catloversg)
+- Add optional file for ignoring some specific commits with git blame (@adeilt)
 - Remove some unnecessary data from save file (@Snarling)
 - Nerf noodle bar (various contributors)
 `,
