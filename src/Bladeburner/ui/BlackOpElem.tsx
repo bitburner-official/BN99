@@ -1,3 +1,6 @@
+import type { Bladeburner } from "../Bladeburner";
+import type { BlackOperation } from "../Actions/BlackOperation";
+
 import React from "react";
 import { Paper, Typography } from "@mui/material";
 
@@ -6,8 +9,6 @@ import { formatNumberNoSuffix } from "../../ui/formatNumber";
 import { convertTimeMsToTimeElapsedString } from "../../utils/StringHelperFunctions";
 import { createProgressBarText } from "../../utils/helpers/createProgressBarText";
 import { TeamSizeButton } from "./TeamSizeButton";
-import { Bladeburner } from "../Bladeburner";
-import { BlackOperation } from "../Actions/BlackOperation";
 import { CopyableText } from "../../ui/React/CopyableText";
 import { SuccessChance } from "./SuccessChance";
 import { StartButton } from "./StartButton";
@@ -41,18 +42,16 @@ export function BlackOpElem({ bladeburner, blackOp }: BlackOpElemProps): React.R
     <Paper sx={{ my: 1, p: 1 }}>
       {isActive ? (
         <>
-          <>
-            <CopyableText value={blackOp.name} />
-            <Typography>
-              (IN PROGRESS - {formatNumberNoSuffix(computedActionTimeCurrent, 0)} /{" "}
-              {formatNumberNoSuffix(bladeburner.actionTimeToComplete, 0)})
-            </Typography>
-            <Typography>
-              {createProgressBarText({
-                progress: computedActionTimeCurrent / bladeburner.actionTimeToComplete,
-              })}
-            </Typography>
-          </>
+          <CopyableText value={blackOp.name} />
+          <Typography>
+            (IN PROGRESS - {formatNumberNoSuffix(computedActionTimeCurrent, 0)} /{" "}
+            {formatNumberNoSuffix(bladeburner.actionTimeToComplete, 0)})
+          </Typography>
+          <Typography>
+            {createProgressBarText({
+              progress: computedActionTimeCurrent / bladeburner.actionTimeToComplete,
+            })}
+          </Typography>
         </>
       ) : (
         <>
