@@ -69,7 +69,7 @@ Enter the following code in the [Script](../basic/scripts.md) editor:
         // In this case, it is set to the maximum amount of money.
         const moneyThresh = ns.getServerMaxMoney(target);
 
-        // Defines the maximum security level the target server can
+        // Defines the minimum security level the target server can
         // have. If the target's security level is higher than this,
         // we'll weaken it before doing anything else
         const securityThresh = ns.getServerMinSecurityLevel(target);
