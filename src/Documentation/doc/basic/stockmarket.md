@@ -144,7 +144,7 @@ The potency of this effect is based on how effective you are when you work (i.e.
 ## Automating the Stock Market
 
 You can write scripts to perform automatic and algorithmic trading on the Stock Market.
-See [TIX API](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.tix.md) for more details.
+See [TIX API](https://github.com/bitburner-official/bitburner-src/blob/stable/markdown/bitburner.tix.md) for more details.
 
 ## Under the Hood
 
