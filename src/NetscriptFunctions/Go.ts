@@ -22,14 +22,16 @@ import {
   handlePassTurn,
   makePlayerMove,
   resetBoardState,
-  throwError,
   validateMove,
   validateTurn,
 } from "../Go/effects/netscriptGoImplementation";
 import { getEnumHelper } from "../utils/EnumHelper";
+import { errorMessage } from "../Netscript/ErrorMessages";
 
 const logger = (ctx: NetscriptContext) => (message: string) => helpers.log(ctx, () => message);
-const error = (ctx: NetscriptContext) => (message: string) => throwError(ctx.workerScript, message);
+const error = (ctx: NetscriptContext) => (message: string) => {
+  throw errorMessage(ctx, message);
+};
 
 /**
  * Go API implementation

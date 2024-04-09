@@ -12,7 +12,6 @@ import {
   simpleBoardFromBoard,
 } from "../boardAnalysis/boardAnalysis";
 import { getScore, resetWinstreak } from "../boardAnalysis/scoring";
-import { WorkerScript } from "../../Netscript/WorkerScript";
 import { WHRNG } from "../../Casino/RNG";
 
 /**
@@ -435,13 +434,6 @@ export function cheatSuccessChance(cheatCount: number) {
   const sourceFileBonus = Player.sourceFileLvl(14) === 3 ? 0.25 : 0;
   const cheatCountScalar = (0.7 - 0.02 * cheatCount) ** cheatCount;
   return Math.max(Math.min(0.6 * cheatCountScalar * Player.mults.crime_success + sourceFileBonus, 1), 0);
-}
-
-/**
- * Throw a runtime error that halts the player's script
- */
-export function throwError(ws: WorkerScript, errorMessage: string) {
-  throw `RUNTIME ERROR\n${ws.name}@${ws.hostname} (PID - ${ws.pid})\n\n ${errorMessage}`;
 }
 
 /**
