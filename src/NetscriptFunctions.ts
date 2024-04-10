@@ -1789,10 +1789,10 @@ function getFunctionNames(obj: object, prefix: string): string[] {
   for (const [key, value] of Object.entries(obj)) {
     if (key === "args") {
       continue;
-    } else if (typeof value == "function") {
+    } else if (typeof value === "function") {
       functionNames.push(prefix + key);
-    } else if (typeof value == "object") {
-      functionNames.push(...getFunctionNames(value, key + "."));
+    } else if (typeof value === "object") {
+      functionNames.push(...getFunctionNames(value, `${prefix}${key}.`));
     }
   }
   return functionNames;
