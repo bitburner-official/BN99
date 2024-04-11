@@ -9,7 +9,7 @@ Returns a promise that resolves with the success or failure state of your last m
 **Signature:**
 
 ```typescript
-opponentNextTurn(logOpponentMove: boolean = true): Promise<{
+opponentNextTurn(logOpponentMove?: boolean): Promise<{
     type: "move" | "pass" | "gameOver";
     x: number | null;
     y: number | null;
@@ -20,7 +20,7 @@ opponentNextTurn(logOpponentMove: boolean = true): Promise<{
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  logOpponentMove | boolean | _(Optional)_ optional, if false prevents logging opponent move |
+|  logOpponentMove | boolean | _(Optional)_ optional, defaults to true. if false prevents logging opponent move |
 
 **Returns:**
 

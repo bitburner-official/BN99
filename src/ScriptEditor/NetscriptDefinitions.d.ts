@@ -3995,14 +3995,14 @@ export interface Go {
    *  Returns a promise that resolves with the success or failure state of your last move, and the AI's response, if applicable.
    *  x:0 y:0 represents the bottom-left corner of the board in the UI.
    *
-   * @param logOpponentMove - optional, if false prevents logging opponent move
+   * @param logOpponentMove - optional, defaults to true. if false prevents logging opponent move
    *
    * @remarks
    * RAM cost: 0 GB
    *
    * @returns a promise that contains if your last move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
    */
-  opponentNextTurn(logOpponentMove: boolean = true): Promise<{
+  opponentNextTurn(logOpponentMove?: boolean): Promise<{
     type: "move" | "pass" | "gameOver";
     x: number | null;
     y: number | null;
