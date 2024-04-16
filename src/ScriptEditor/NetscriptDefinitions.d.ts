@@ -8181,6 +8181,14 @@ export interface Corporation extends WarehouseAPI, OfficeAPI {
    * ```
    */
   nextUpdate(): Promise<CorpStateName>;
+
+  /**
+   * Sell a division
+   * @remarks
+   * RAM cost: 20 GB
+   *
+   * @param divisionName - Name of the division */
+  sellDivision(divisionName: string): void;
 }
 
 /** Product rating information
