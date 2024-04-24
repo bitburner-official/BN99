@@ -155,7 +155,7 @@ export const CONSTANTS: {
 
   // Also update doc/source/changelog.rst
   LatestUpdate: `
-## v2.6.1 dev - last updated 29 Mar 2024
+## v2.6.1 dev - last updated 23 Apr 2024
 
 See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/v2.6.0/src/Documentation/doc/changelog.md
 
@@ -165,12 +165,14 @@ See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/
 
 ### API
 
+- (Corporation) Add a missing check on exportMaterial (@catloversg)
+- (Corporation) Add ns.corporation.sellDivision (@catloversg)
 - (Formulas) Add ns.formulas.hacking.growAmount (@d0sboots)
 - (Go) Some changes to the Go API, including some minor breaking changes. Please refer to the API documentation in the script editor or at https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.go.md (@ficocelliguy)
 - (Go) Fix a bug that allowed facing secret opponent early or with wrong board size (@ficoccelliguy)
 - (Singularity) Added ns.singularity.getFactionEnemies function (@jaguardeer)
 - (Sleeve) SleeveInfiltrationWork now has a nextCompletion promise (@Caldwell-74)
-
+- Fixed an issue that caused ns.disableLog to work incorrectly for some functions (@ficocelliguy)
 
 ### UI
 
@@ -179,15 +181,19 @@ See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/
 - (Go) Fix an incorrect displayed max favor on Go history page (@ficocelliguy)
 - Text files (.txt and .json) posted to the terminal from the ls command are now clickable (@catloversg)
 - Fixed a display issue on the bitverse page (@LJNeon)
+- Fixed a display issue on the stats page (@catloversg)
 
 ### MISC
 
 - (Bladeburner) Internal code refactoring (@Snarling)
+- (Corporation) Fix an issue that could cause incorrect average material prices via bulk purchases (@catloversg)
 - (Go) "No AI" white player can now pass (@ficocelliguy)
 - (Go) Reimplement superko rule, adjust save data (@ficocelliguy)
 - (Go) Balance tweaks and other bugfixes (@ficocelliguy)
+- (Hacknet) Fixed an issue in the engine loop that could cause offline earnings with hacknet to be inaccurate (@d0sboots)
 - Update Credits page to show @d0sboots as an active maintainer (@Snarling)
-- Miscellaneous documentation fixes (@adeilt, @User670, @catloversg, @gmcew)
+- Miscellaneous documentation fixes (@adeilt, @User670, @catloversg, @gmcew, @jeek, @pontsuyo, @ficocelliguy, @d0sboots)
+- Changed the name of an augmentation at the request of the original author (@hydroflame)
 - Allow .json files (@shyguy1412)
 - Remove jquery dependency (@catloversg)
 - Disable text translation, which commonly causes crashes (@catloversg)
@@ -195,6 +201,10 @@ See 2.6.0 changelog at https://github.com/bitburner-official/bitburner-src/blob/
 - Servers that don't exist yet will not show up in autocomplete data (@catloversg)
 - Add optional file for ignoring some specific commits with git blame (@adeilt)
 - Remove some unnecessary data from save file (@Snarling)
+- Remove an internal dependency and streamline code for downloading files (@catloversg)
+- Remove some unused internal constants (@catloversg)
+- Ensure lastNodeReset property is initialized correctly on the player object (@catloversg)
+- The value of "this" within the main function will no longer be the script module itself (@d0sboots)
 - Nerf noodle bar (various contributors)
 `,
 };
