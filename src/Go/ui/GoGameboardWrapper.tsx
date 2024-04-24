@@ -43,7 +43,6 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
   // Destructure boardState to allow useMemo to trigger correctly
   const traditional = Settings.GoTraditionalStyle;
   const [showPriorMove, setShowPriorMove] = useState(false);
-  const [opponent, setOpponent] = useState<GoOpponent>(boardState.ai);
   const [scoreOpen, setScoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [waitingOnAI, setWaitingOnAI] = useState(false);
@@ -75,7 +74,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
 
     // Lock the board when it isn't the player's turn
     const gameOver = boardState.previousPlayer === null;
-    const notYourTurn = boardState.previousPlayer === GoColor.black && opponent !== GoOpponent.none;
+    const notYourTurn = boardState.previousPlayer === GoColor.black && Go.currentGame.ai !== GoOpponent.none;
     if (notYourTurn) {
       SnackbarEvents.emit(`It is not your turn to play.`, ToastVariant.WARNING, 2000);
       return;
@@ -94,7 +93,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
     const didUpdateBoard = makeMove(boardState, x, y, currentPlayer);
     if (didUpdateBoard) {
       rerender();
-      opponent !== GoOpponent.none && takeAiTurn(boardState);
+      Go.currentGame.ai !== GoOpponent.none && takeAiTurn(boardState);
     }
   }
 
@@ -113,7 +112,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
     }
 
     setTimeout(() => {
-      opponent !== GoOpponent.none && takeAiTurn(boardState);
+      Go.currentGame.ai !== GoOpponent.none && takeAiTurn(boardState);
     }, 100);
   }
 
@@ -139,10 +138,9 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
     setSearchOpen(true);
   }
 
-  function resetState(newBoardSize = boardSize, newOpponent = opponent) {
+  function resetState(newBoardSize = boardSize, newOpponent = Go.currentGame.ai) {
     setScoreOpen(false);
     setSearchOpen(false);
-    setOpponent(newOpponent);
     if (boardState.previousPlayer !== null && boardState.previousBoards.length) {
       resetWinstreak(boardState.ai, false);
     }
@@ -173,7 +171,8 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
   const endGameAvailable = boardState.previousPlayer === GoColor.white && boardState.passCount;
   const noLegalMoves =
     boardState.previousPlayer === GoColor.white && !getAllValidMoves(boardState, GoColor.black).length;
-  const disablePassButton = opponent !== GoOpponent.none && boardState.previousPlayer === GoColor.black && waitingOnAI;
+  const disablePassButton =
+    Go.currentGame.ai !== GoOpponent.none && boardState.previousPlayer === GoColor.black && waitingOnAI;
 
   const scoreBoxText = boardState.previousBoards.length
     ? `Score: Black: ${score[GoColor.black].sum} White: ${score[GoColor.white].sum}`
@@ -206,7 +205,7 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
         onClose={() => setScoreOpen(false)}
         newSubnet={() => newSubnet()}
         finalScore={score}
-        opponent={opponent}
+        opponent={Go.currentGame.ai}
       ></GoScoreModal>
       <div className={classes.boardFrame}>
         {traditional ? (
@@ -219,8 +218,12 @@ export function GoGameboardWrapper({ showInstructions }: GoGameboardWrapperProps
         <Box className={`${classes.inlineFlexBox} ${classes.opponentTitle}`}>
           <br />
           <Typography variant={"h6"} className={classes.opponentLabel}>
-            {opponent !== GoOpponent.none ? "Subnet owner: " : ""}{" "}
-            {opponent === GoOpponent.w0r1d_d43m0n ? <CorruptableText content={opponent} spoiler={false} /> : opponent}
+            {Go.currentGame.ai !== GoOpponent.none ? "Subnet owner: " : ""}{" "}
+            {Go.currentGame.ai === GoOpponent.w0r1d_d43m0n ? (
+              <CorruptableText content={Go.currentGame.ai} spoiler={false} />
+            ) : (
+              Go.currentGame.ai
+            )}
           </Typography>
           <br />
         </Box>
