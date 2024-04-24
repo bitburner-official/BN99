@@ -358,6 +358,8 @@ export function BulkPurchase(
   const cost = amt * material.marketPrice;
   if (corp.funds >= cost) {
     corp.loseFunds(cost, "materials");
+    material.averagePrice =
+      (material.averagePrice * material.stored + material.marketPrice * amt) / (material.stored + amt);
     material.stored += amt;
     warehouse.sizeUsed = warehouse.sizeUsed + amt * matSize;
   } else {
