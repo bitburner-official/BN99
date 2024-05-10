@@ -3949,6 +3949,17 @@ type GoOpponent =
   | "Illuminati"
   | "????????????";
 
+/** @public */
+type SimpleOpponentStats = {
+  wins: number;
+  losses: number;
+  winStreak: number;
+  highestWinStreak: number;
+  favor: number;
+  bonusPercent: number;
+  bonusDescription: string;
+};
+
 /**
  * IPvGO api
  * @public
@@ -4167,6 +4178,28 @@ export interface Go {
      * (This is intentionally expensive; you can derive this info from just getBoardState() )
      */
     getControlledEmptyNodes(): string[];
+
+    /**
+     * Displays the game history, captured nodes, and gained bonuses for each opponent you have played against.
+     *
+     * The details are keyed by opponent name, in this structure:
+     *
+     * <pre lang="javascript">
+     * {
+     *   <OpponentName>: {
+     *     wins: number,
+     *     losses: number,
+     *     winStreak: number,
+     *     highestWinStreak: number,
+     *     favor: number,
+     *     bonusPercent: number,
+     *     bonusDescription: string,
+     *   }
+     * }
+     * </pre>
+     *
+     */
+    getStats(): Partial<Record<GoOpponent, SimpleOpponentStats>>;
   };
 
   /**
