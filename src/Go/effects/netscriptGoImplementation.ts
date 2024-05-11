@@ -1,14 +1,14 @@
-import { BoardState, Play, SimpleOpponentStats } from "../Types";
+import { Play, SimpleOpponentStats } from "../Types";
 
 import { Player } from "@player";
 import { AugmentationName, GoColor, GoOpponent, GoPlayType, GoValidity } from "@enums";
 import { Go, GoEvents } from "../Go";
-import { getMove, sleep } from "../boardAnalysis/goAI";
 import { getNewBoardState, makeMove, passTurn, updateCaptures, updateChains } from "../boardState/boardState";
+import { makeAIMove } from "../boardAnalysis/goAI";
 import {
   evaluateIfMoveIsValid,
-  getColorOnSimpleBoard,
   getControlledSpace,
+  getPreviousMove,
   simpleBoardFromBoard,
 } from "../boardAnalysis/boardAnalysis";
 import { getOpponentStats, getScore, resetWinstreak } from "../boardAnalysis/scoring";
@@ -104,7 +104,7 @@ export async function handlePassTurn(logger: (s: string) => void) {
     logEndGame(logger);
     return getOpponentNextMove(false, logger);
   } else {
-    return getAIMove(Go.currentGame);
+    return makeAIMove(Go.currentGame);
   }
 }
 
@@ -122,26 +122,13 @@ export async function makePlayerMove(logger: (s: string) => void, error: (s: str
 
   GoEvents.emit();
   logger(`Go move played: ${x}, ${y}`);
-  return getAIMove(boardState);
+  return makeAIMove(boardState);
 }
 
 /**
   Returns the promise that provides the opponent's move, once it finishes thinking.
  */
 export async function getOpponentNextMove(logOpponentMove = true, logger: (s: string) => void) {
-  // Handle the case where Go.nextTurn isn't populated yet
-  if (!Go.nextTurn) {
-    const previousMove = getPreviousMove();
-    const type =
-      Go.currentGame.previousPlayer === null ? GoPlayType.gameOver : previousMove ? GoPlayType.move : GoPlayType.pass;
-
-    Go.nextTurn = Promise.resolve({
-      type,
-      x: previousMove?.[0] ?? null,
-      y: previousMove?.[1] ?? null,
-    });
-  }
-
   // Only asynchronously log the opponent move if not disabled by the player
   if (logOpponentMove) {
     return Go.nextTurn.then((move) => {
@@ -156,43 +143,6 @@ export async function getOpponentNextMove(logOpponentMove = true, logger: (s: st
     });
   }
 
-  return Go.nextTurn;
-}
-
-/**
- * Retrieves a move from the current faction in response to the player's move
- */
-export async function getAIMove(boardState: BoardState): Promise<Play> {
-  let resolve: (value: Play) => void;
-  Go.nextTurn = new Promise<Play>((res) => {
-    resolve = res;
-  });
-
-  getMove(boardState, GoColor.white, Go.currentGame.ai).then(async (result) => {
-    if (result.type === GoPlayType.pass) {
-      passTurn(Go.currentGame, GoColor.white);
-    }
-
-    // If there is no move to apply, simply return the result
-    if (boardState !== Go.currentGame || result.type !== GoPlayType.move || result.x === null || result.y === null) {
-      return resolve(result);
-    }
-
-    await sleep(400);
-    const aiUpdatedBoard = makeMove(boardState, result.x, result.y, GoColor.white);
-
-    // Handle the AI breaking. This shouldn't ever happen.
-    if (!aiUpdatedBoard) {
-      boardState.previousPlayer = GoColor.white;
-      console.error(`Invalid AI move attempted: ${result.x}, ${result.y}. This should not happen.`);
-      GoEvents.emit();
-      return resolve(result);
-    }
-
-    await sleep(300);
-    GoEvents.emit();
-    resolve(result);
-  });
   return Go.nextTurn;
 }
 
@@ -298,32 +248,6 @@ export function getCurrentPlayer(): "None" | "White" | "Black" {
 }
 
 /**
- * Find a move made by the previous player, if present.
- */
-export function getPreviousMove(): [number, number] | null {
-  const priorBoard = Go.currentGame?.previousBoards[0];
-  if (Go.currentGame.passCount || !priorBoard) {
-    return null;
-  }
-
-  for (const rowIndexString in Go.currentGame.board) {
-    const row = Go.currentGame.board[+rowIndexString] ?? [];
-    for (const pointIndexString in row) {
-      const point = row[+pointIndexString];
-      const priorColor = point && priorBoard && getColorOnSimpleBoard(priorBoard, point.x, point.y);
-      const currentColor = point?.color;
-      const isPreviousPlayer = currentColor === Go.currentGame.previousPlayer;
-      const isChanged = priorColor !== currentColor;
-      if (priorColor && currentColor && isPreviousPlayer && isChanged) {
-        return [+rowIndexString, +pointIndexString];
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
  * Handle post-game logging
  */
 function logEndGame(logger: (s: string) => void) {
@@ -418,7 +342,7 @@ export async function determineCheatSuccess(
     callback();
     state.cheatCount++;
     GoEvents.emit();
-    return getAIMove(state);
+    return makeAIMove(state);
   }
   // If there have been prior cheat attempts, and the cheat fails, there is a 10% chance of instantly losing
   else if (state.cheatCount && (ejectRngOverride ?? rng.random()) < 0.1) {
@@ -435,7 +359,7 @@ export async function determineCheatSuccess(
     logger(`Cheat failed. Your turn has been skipped.`);
     passTurn(state, GoColor.black, false);
     state.cheatCount++;
-    return getAIMove(state);
+    return makeAIMove(state);
   }
 }
 
