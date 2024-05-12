@@ -10,7 +10,7 @@ import { OfficeSpace } from "./OfficeSpace";
 import { Material } from "./Material";
 import { Product } from "./Product";
 import { Warehouse } from "./Warehouse";
-import { IndustryType } from "@enums";
+import { FactionName, IndustryType } from "@enums";
 import { ResearchMap } from "./ResearchMap";
 import { isRelevantMaterial } from "./ui/Helpers";
 import { CityName } from "@enums";
@@ -25,6 +25,7 @@ import {
 } from "./helpers";
 import { PositiveInteger } from "../types";
 import { currentNodeMults } from "../BitNode/BitNodeMultipliers";
+import { Factions } from "../Faction/Factions";
 
 export function createCorporation(corporationName: string, selfFund: boolean, restart: boolean): boolean {
   if (!Player.canAccessCorporation()) {
@@ -627,4 +628,24 @@ export function SetProductMarketTA1(product: Product, on: boolean): void {
 
 export function SetProductMarketTA2(product: Product, on: boolean): void {
   product.marketTa2 = on;
+}
+
+export function bribe(corporation: Corporation, fundsForBribing: number, factionName: FactionName): number {
+  if (corporation.valuation < corpConstants.bribeThreshold) {
+    return 0;
+  }
+  if (fundsForBribing <= 0 || corporation.funds < fundsForBribing) {
+    return 0;
+  }
+  const faction = Factions[factionName];
+  const factionInfo = faction.getInfo();
+  if (!factionInfo.offersWork()) {
+    return 0;
+  }
+
+  const reputationGain = fundsForBribing / corpConstants.bribeAmountPerReputation;
+  faction.playerReputation += reputationGain;
+  corporation.loseFunds(fundsForBribing, "bribery");
+
+  return reputationGain;
 }
