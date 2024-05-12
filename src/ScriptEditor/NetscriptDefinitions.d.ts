@@ -5158,6 +5158,8 @@ interface InfiltrationLocation {
   location: ILocation;
   reward: InfiltrationReward;
   difficulty: number;
+  maxClearanceLevel: number;
+  startingSecurityLevel: number;
 }
 
 /**
