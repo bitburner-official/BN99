@@ -42,6 +42,8 @@ import { SaveData } from "./types";
 import { SaveDataError, canUseBinaryFormat, decodeSaveData, encodeJsonSaveString } from "./utils/SaveDataUtils";
 import { isBinaryFormat } from "../electron/saveDataBinaryFormat";
 import { downloadContentAsFile } from "./utils/FileUtils";
+import { showAPIBreaks } from "./utils/APIBreaks/APIBreak";
+import { breakInfos261 } from "./utils/APIBreaks/2.6.1";
 import { handleGetSaveDataError } from "./Netscript/ErrorMessages";
 
 /* SaveObject.js
@@ -734,6 +736,9 @@ Error: ${e}`);
     const freshSaveData = getGoSave();
     Object.assign(freshSaveData.stats, stats);
     loadGo(JSON.stringify(freshSaveData));
+  }
+  if (ver < 39) {
+    showAPIBreaks("2.6.1", ...breakInfos261);
   }
 }
 
