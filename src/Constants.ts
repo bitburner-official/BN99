@@ -58,7 +58,8 @@ export const CONSTANTS: {
 } = {
   VersionString: "2.6.1dev",
   isDevBranch: true,
-  VersionNumber: 38,
+  // 39 is 2.6.1 final, incremented early due to API break. No need to increment on 2.6.1 full release.
+  VersionNumber: 39,
 
   /** Max level for any skill, assuming no multipliers. Determined by max numerical value in javascript for experience
    * and the skill level formula in Player.js. Note that all this means it that when experience hits MAX_INT, then
