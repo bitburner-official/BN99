@@ -6110,7 +6110,6 @@ export interface NS {
    * ```js
    * ns.sqlinject("foodnstuff");
    * ```
-   * @remarks RAM cost: 0.05 GB
    * @param host - Hostname of the target server.
    */
   sqlinject(host: string): void;
