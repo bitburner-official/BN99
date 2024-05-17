@@ -139,7 +139,7 @@ export function prestigeSourceFile(this: PlayerObject): void {
 
   if (this.bitNodeN === 10) {
     for (let i = 0; i < this.sleeves.length; i++) {
-      this.sleeves[i].shock = Math.max(25, this.sleeves[i].shock);
+      this.sleeves[i].shock = Math.min(25, this.sleeves[i].shock);
       this.sleeves[i].sync = Math.max(25, this.sleeves[i].sync);
     }
   }
