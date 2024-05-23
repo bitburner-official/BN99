@@ -1,4 +1,5 @@
 import { AugmentationName, CityName, CompletedProgramName, FactionName, LiteratureName, CompanyName } from "@enums";
+import { Augmentations } from "./Augmentation/Augmentations";
 import { initBitNodeMultipliers } from "./BitNode/BitNode";
 import { Companies } from "./Company/Companies";
 import { resetIndustryResearchTrees } from "./Corporation/data/IndustryData";
@@ -60,19 +61,14 @@ export function prestigeAugmentation(): void {
   AddToAllServers(homeComp);
   prestigeHomeComputer(homeComp);
 
-  if (Player.hasAugmentation(AugmentationName.Neurolink, true)) {
-    homeComp.programs.push(CompletedProgramName.ftpCrack);
-    homeComp.programs.push(CompletedProgramName.relaySmtp);
+  // Receive starting money and programs from installed augmentations
+  for (const ownedAug of Player.augmentations) {
+    const aug = Augmentations[ownedAug.name];
+    Player.gainMoney(aug.startingMoney, "other");
+    for (const program of aug.programs) {
+      homeComp.programs.push(program);
+    }
   }
-  if (Player.hasAugmentation(AugmentationName.CashRoot, true)) {
-    Player.setMoney(1e6);
-    homeComp.programs.push(CompletedProgramName.bruteSsh);
-  }
-  if (Player.hasAugmentation(AugmentationName.PCMatrix, true)) {
-    homeComp.programs.push(CompletedProgramName.deepScan1);
-    homeComp.programs.push(CompletedProgramName.autoLink);
-  }
-
   if (Player.sourceFileLvl(5) > 0 || Player.bitNodeN === 5) {
     homeComp.programs.push(CompletedProgramName.formulas);
   }
