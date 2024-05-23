@@ -116,10 +116,10 @@ function Root(props: IProps): React.ReactElement {
     if (editorRef.current === null || currentScript === null) return;
     if (!decorations) decorations = editorRef.current.createDecorationsCollection();
     if (!currentScript.path.endsWith(".js")) return;
-    const awaitWarning = checkInfiniteLoop(newCode);
-    if (awaitWarning !== -1) {
-      decorations.set([
-        {
+    const possibleLines = checkInfiniteLoop(newCode);
+    if (possibleLines.length !== 0) {
+      decorations.set(
+        possibleLines.map((awaitWarning) => ({
           range: {
             startLineNumber: awaitWarning,
             startColumn: 1,
@@ -130,11 +130,12 @@ function Root(props: IProps): React.ReactElement {
             isWholeLine: true,
             glyphMarginClassName: "myGlyphMarginClass",
             glyphMarginHoverMessage: {
-              value: "Possible infinite loop, await something.",
+              value:
+                "Possible infinite loop, await something. If this is a false-positive, use `// @ignore-infinite` to suppress.",
             },
           },
-        },
-      ]);
+        })),
+      );
     } else decorations.clear();
   }
 
