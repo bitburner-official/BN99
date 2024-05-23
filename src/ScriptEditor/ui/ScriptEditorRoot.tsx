@@ -233,6 +233,11 @@ function Root(props: IProps): React.ReactElement {
 
   function onTabClick(index: number): void {
     if (currentScript !== null) {
+      // Save the current position of the cursor.
+      const currentPosition = editorRef.current?.getPosition();
+      if (currentPosition) {
+        currentScript.lastPosition = currentPosition;
+      }
       // Save currentScript to openScripts
       const curIndex = currentTabIndex();
       if (curIndex !== undefined) {
@@ -356,6 +361,17 @@ function Root(props: IProps): React.ReactElement {
     }
   }
 
+  function onUnmountEditor() {
+    if (!currentScript) {
+      return;
+    }
+    // Save the current position of the cursor.
+    const currentPosition = editorRef.current?.getPosition();
+    if (currentPosition) {
+      currentScript.lastPosition = currentPosition;
+    }
+  }
+
   const { VimStatus } = useVimEditor({
     editor: editorRef.current,
     vim: options.vim,
@@ -392,7 +408,7 @@ function Root(props: IProps): React.ReactElement {
           onTabUpdate={onTabUpdate}
         />
         <div style={{ flex: "0 0 5px" }} />
-        <Editor onMount={onMount} onChange={updateCode} />
+        <Editor onMount={onMount} onChange={updateCode} onUnmount={onUnmountEditor} />
 
         {VimStatus}
 
