@@ -3969,7 +3969,7 @@ export interface Go {
    * @remarks
    * RAM cost: 4 GB
    *
-   * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+   * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
    */
   makeMove(
     x: number,
@@ -3987,7 +3987,7 @@ export interface Go {
    * This can also be used if you pick up the game in a state where the opponent needs to play next. For example: if BitBurner was
    * closed while waiting for the opponent to make a move, you may need to call passTurn() to get them to play their move on game start.
    *
-   * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+   * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
    *
    * @remarks
    * RAM cost: 0 GB
@@ -4205,7 +4205,7 @@ export interface Go {
   cheat: {
     /**
      * Returns your chance of successfully playing one of the special moves in the ns.go.cheat API.
-     * Scales with your crime success rate stat. Caps at 80%.
+     * Scales with your crime success rate stat.
      *
      * Warning: if you fail to play a cheat move, your turn will be skipped. After your first cheat attempt, if you fail, there is a
      * small (~10%) chance you will instantly be ejected from the subnet.
@@ -4227,7 +4227,7 @@ export interface Go {
      * RAM cost: 8 GB
      * Requires Bitnode 14.2 to use
      *
-     * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+     * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
      */
     removeRouter(
       x: number,
@@ -4250,7 +4250,7 @@ export interface Go {
      * RAM cost: 8 GB
      * Requires Bitnode 14.2 to use
      *
-     * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+     * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
      */
     playTwoMoves(
       x1: number,
@@ -4275,7 +4275,7 @@ export interface Go {
      * RAM cost: 8 GB
      * Requires Bitnode 14.2 to use
      *
-     * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+     * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
      */
     repairOfflineNode(
       x: number,
@@ -4299,7 +4299,7 @@ export interface Go {
      * RAM cost: 8 GB
      * Requires Bitnode 14.2 to use
      *
-     * @returns a promise that contains if your move was valid and successful, the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
+     * @returns a promise that contains the opponent move's x and y coordinates (or pass) in response, or an indication if the game has ended
      */
     destroyNode(
       x: number,
