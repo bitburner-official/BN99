@@ -56,7 +56,7 @@ export class GraftingWork extends Work {
         dialogBoxCreate(
           <>
             You've finished grafting {augName}.<br />
-            The augmentation has been applied to your body{" "}
+            The augmentation has been applied to your body
             {Player.hasAugmentation(AugmentationName.CongruityImplant, true) ? "." : ", but you feel a bit off."}
           </>,
         );
