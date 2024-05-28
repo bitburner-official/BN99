@@ -238,23 +238,24 @@ export function NetscriptSleeve(): InternalAPI<NetscriptSleeve> {
       const action = helpers.string(ctx, "action", _action);
       checkSleeveAPIAccess(ctx);
       checkSleeveNumber(ctx, sleeveNumber);
+      let contractName = undefined;
       if (action === "Take on contracts") {
-        const contract = getEnumHelper("BladeContractName").nsGetMember(ctx, _contract);
+        const contractEnum = getEnumHelper("BladeContractName").nsGetMember(ctx, _contract);
+        contractName = helpers.string(ctx, "contract", _contract);
         for (let i = 0; i < Player.sleeves.length; ++i) {
           if (i === sleeveNumber) continue;
           const otherWork = Player.sleeves[i].currentWork;
-          if (otherWork?.type === SleeveWorkType.BLADEBURNER && otherWork.actionId.name === contract) {
+          if (otherWork?.type === SleeveWorkType.BLADEBURNER && otherWork.actionId.name === contractEnum) {
             throw helpers.errorMessage(
               ctx,
               `Sleeve ${sleeveNumber} cannot take on contracts because Sleeve ${i} is already performing that action.`,
             );
           }
         }
-        const actionId: ActionIdentifier = { type: BladeActionType.contract, name: contract };
+        const actionId: ActionIdentifier = { type: BladeActionType.contract, name: contractEnum };
         Player.sleeves[sleeveNumber].startWork(new SleeveBladeburnerWork({ actionId }));
       }
-
-      return Player.sleeves[sleeveNumber].bladeburner(action);
+      return Player.sleeves[sleeveNumber].bladeburner(action, contractName);
     },
   };
 
