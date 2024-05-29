@@ -14,7 +14,7 @@ interface BlackOpPageProps {
 }
 
 export function BlackOpPage({ bladeburner }: BlackOpPageProps): React.ReactElement {
-  const blackOps = blackOpsArray.slice(0, bladeburner.numBlackOpsComplete + 1);
+  const blackOps = blackOpsArray.slice(0, bladeburner.numBlackOpsComplete + 1).reverse();
 
   return (
     <>
