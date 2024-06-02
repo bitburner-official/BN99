@@ -72,6 +72,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { useRerender } from "./React/hooks";
 import { HistoryProvider } from "./React/Documentation";
 import { GoRoot } from "../Go/ui/GoRoot";
+import { FactoryRoot } from "../Factory/ui/FactoryRoot";
 
 const htmlLocation = location;
 
@@ -115,6 +116,7 @@ export let Router: IRouter = {
 function determineStartPage() {
   if (RecoveryMode) return Page.Recovery;
   if (Player.currentWork !== null) return Page.Work;
+  return Page.Factory;
   return Page.Terminal;
 }
 
@@ -358,6 +360,10 @@ export function GameRoot(): React.ReactElement {
     }
     case Page.Go: {
       mainPage = <GoRoot />;
+      break;
+    }
+    case Page.Factory: {
+      mainPage = <FactoryRoot />;
       break;
     }
     case Page.Achievements: {

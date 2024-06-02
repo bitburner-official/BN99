@@ -367,6 +367,15 @@ const stanek = {
   acceptGift: RamCostConstants.StanekAcceptGift,
 } as const;
 
+const factory: any = new Proxy(
+  {},
+  {
+    get() {
+      return 0;
+    },
+  },
+);
+
 // UI API
 const ui = {
   getTheme: 0,
@@ -469,6 +478,7 @@ export const RamCosts: RamCostTree<NSFull> = {
   codingcontract,
   sleeve,
   stanek,
+  factory,
   ui,
   grafting,
 

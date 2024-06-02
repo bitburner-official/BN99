@@ -5143,6 +5143,105 @@ interface Stanek {
   acceptGift(): boolean;
 }
 
+export enum Tile {
+  Empty = 0,
+}
+
+export enum EntityType {
+  Bot = "bot",
+  Dispenser = "dispenser",
+  Dock = "dock",
+  Crafter = "crafter",
+  Chest = "chest",
+}
+
+export enum Item {
+  BasicR = "basicr",
+  BasicG = "basicg",
+  BasicB = "basicb",
+  ComplexR = "complexr",
+  ComplexG = "complexg",
+  ComplexB = "complexb",
+}
+
+export interface BaseEntity {
+  type: EntityType;
+  x: number;
+  y: number;
+}
+
+export interface Bot extends InventoryEntity {
+  type: EntityType.Bot;
+  name: string;
+  energy: number;
+}
+
+export interface InventoryEntity extends BaseEntity {
+  inventory: Item[];
+  maxInventory: number;
+}
+
+export interface Dispenser extends InventoryEntity {
+  type: EntityType.Dispenser;
+  dispensing: Item;
+  cooldown: number;
+  cooldownUntil: number;
+}
+
+export interface Dock extends InventoryEntity {
+  type: EntityType.Dock;
+  potentialRequest: Item[];
+  potentialRequestCount: number;
+  currentRequest: Item[];
+}
+
+export interface Chest extends InventoryEntity {
+  type: EntityType.Chest;
+}
+
+export interface Crafter extends InventoryEntity {
+  type: EntityType.Crafter;
+  recipe: Recipe;
+}
+
+export interface Recipe {
+  input: Item[];
+  output: Item[];
+}
+
+export type Entity = Bot | Dispenser | Dock | Crafter | Chest;
+
+interface Factory {
+  /**
+   * Move a bot
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the move succeeded, false otherwise.
+   */
+  moveBot(name: string, x: number, y: number): Promise<boolean>;
+
+  /**
+   * Get information about a bot
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns bot information
+   */
+  getBot(name: string): Bot | undefined;
+
+  entityAt(x: number, y: number): Entity | undefined;
+
+  entities(): Entity[];
+
+  transfer(name: string, x: number, y: number, pickup: Item[], drop: Item[]): Promise<boolean>;
+
+  craft(name: string, x: number, y: number): Promise<boolean>;
+
+  getBits(): number;
+
+  getBotPrice(): number;
+  purchaseBot(name: string, x: number, y: number): boolean;
+}
+
 /** @public */
 interface InfiltrationReward {
   tradeRep: number;
@@ -5347,6 +5446,12 @@ export interface NS {
    * @remarks RAM cost: 0 GB
    */
   readonly stanek: Stanek;
+
+  /**
+   * Namespace for factory functions. Contains spoilers.
+   * @remarks RAM cost: 0 GB
+   */
+  readonly factory: Factory;
 
   /**
    * Namespace for infiltration functions.
