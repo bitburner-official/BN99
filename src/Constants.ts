@@ -158,10 +158,12 @@ export const CONSTANTS: {
 
   // Also update doc/source/changelog.rst
   LatestUpdate: `
-## v2.6.2 dev - Last update 22 May 2024
+## v2.6.2 dev - Last update 2 June 2024
 
 See 2.6.1 changelog at https://github.com/bitburner-official/bitburner-src/blob/v2.6.1/src/Documentation/doc/changelog.md
 
-No changes yet since 2.6.1 release
+### HOTFIX (changes also added to 2.6.1 post release)
+
+- Fixed an issue with invalid format on steam cloud save (@catloversg)
 `,
 };
