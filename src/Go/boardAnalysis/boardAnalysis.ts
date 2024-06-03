@@ -1,6 +1,6 @@
-import type { Board, BoardState, Neighbor, PointState, SimpleBoard } from "../Types";
+import type { Board, BoardState, Neighbor, Play, PointState, SimpleBoard } from "../Types";
 
-import { GoValidity, GoOpponent, GoColor } from "@enums";
+import { GoValidity, GoOpponent, GoColor, GoPlayType } from "@enums";
 import { Go } from "../Go";
 import {
   findAdjacentPointsInChain,
@@ -654,4 +654,24 @@ export function getPreviousMove(): [number, number] | null {
   }
 
   return null;
+}
+
+/**
+ * Gets the last move, if it was made by the specified color and is present
+ */
+export function getPreviousMoveDetails(): Play {
+  const priorMove = getPreviousMove();
+  if (priorMove) {
+    return {
+      type: GoPlayType.move,
+      x: priorMove[0],
+      y: priorMove[1],
+    };
+  }
+
+  return {
+    type: !priorMove && Go.currentGame?.passCount ? GoPlayType.pass : GoPlayType.gameOver,
+    x: null,
+    y: null,
+  };
 }
