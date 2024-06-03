@@ -8,11 +8,13 @@ import { useBoolean } from "../../ui/React/hooks";
 import { BaseServer } from "../../Server/BaseServer";
 
 import { Options } from "./Options";
+import { FilePath } from "../../Paths/FilePath";
+import { hasScriptExtension } from "../../Paths/ScriptFilePath";
 
 export interface ScriptEditorContextShape {
   ram: string;
   ramEntries: string[][];
-  updateRAM: (newCode: string | null, server: BaseServer | null) => void;
+  updateRAM: (newCode: string | null, filename: FilePath | null, server: BaseServer | null) => void;
 
   isUpdatingRAM: boolean;
   startUpdatingRAM: () => void;
@@ -28,14 +30,13 @@ export function ScriptEditorContextProvider({ children, vim }: { children: React
   const [ram, setRAM] = useState("RAM: ???");
   const [ramEntries, setRamEntries] = useState<string[][]>([["???", ""]]);
 
-  const updateRAM: ScriptEditorContextShape["updateRAM"] = (newCode, server) => {
-    if (newCode === null || server === null) {
+  const updateRAM: ScriptEditorContextShape["updateRAM"] = (newCode, filename, server) => {
+    if (newCode == null || filename == null || server == null || !hasScriptExtension(filename)) {
       setRAM("N/A");
       setRamEntries([["N/A", ""]]);
       return;
     }
-
-    const ramUsage = calculateRamUsage(newCode, server.scripts);
+    const ramUsage = calculateRamUsage(newCode, filename, server.scripts, server.hostname);
     if (ramUsage.cost && ramUsage.cost > 0) {
       const entries = ramUsage.entries?.sort((a, b) => b.cost - a.cost) ?? [];
       const entriesDisp = [];
