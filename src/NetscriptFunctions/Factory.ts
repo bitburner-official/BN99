@@ -1,9 +1,9 @@
 import { Bot, Factory as IFactory, EntityType, Item, Crafter } from "@nsdefs";
 import { InternalAPI } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
-import { NewBot, factory, factorySize } from "../Factory/Helper";
-import { adjacent, bitsMap, findBot, findEntityAt } from "../Factory/Factory";
-import { botPrice } from "../Factory/formulas/formulas";
+import { NewBot, factory, factorySize, resetFactory } from "../Factory/Helper";
+import { adjacent, bitsMap, findEntity, isEntityContainer } from "../Factory/Factory";
+import { botPrice, upgradeMaxInventoryCost } from "../Factory/formulas/formulas";
 
 export function NetscriptFactory(): InternalAPI<IFactory> {
   return {
@@ -12,10 +12,9 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
       const botCount = factory.entities.reduce((acc, e) => (e.type === EntityType.Bot ? acc + 1 : acc), 0);
       return botPrice(botCount);
     },
-    purchaseBot: (ctx) => (_name, _x, _y) => {
+    purchaseBot: (ctx) => (_name, _coord) => {
       const name = helpers.string(ctx, "name", _name);
-      const x = helpers.number(ctx, "x", _x);
-      const y = helpers.number(ctx, "y", _y);
+      const [x, y] = helpers.coord2d(ctx, "coord", _coord);
       const another = factory.entities.find((e): e is Bot => e.type === EntityType.Bot && e.name === name);
       if (another) {
         helpers.log(ctx, () => `bot "${name}" already exists`);
@@ -41,10 +40,9 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
     },
     moveBot:
       (ctx) =>
-      async (_name, _x, _y): Promise<boolean> => {
+      async (_name, _coord): Promise<boolean> => {
         const name = helpers.string(ctx, "name", _name);
-        const x = helpers.number(ctx, "x", _x);
-        const y = helpers.number(ctx, "y", _y);
+        const [x, y] = helpers.coord2d(ctx, "coord", _coord);
 
         const bot = factory.entities.find((e) => e.type === EntityType.Bot && e.name === name);
         if (!bot) return Promise.resolve(false);
@@ -57,40 +55,37 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
           return Promise.resolve(true);
         });
       },
-    getBot:
-      (ctx) =>
-      (_name): Bot | undefined => {
-        const name = helpers.string(ctx, "name", _name);
-        const bot = factory.entities.find((e): e is Bot => e.type === EntityType.Bot && e.name === name);
-        if (!bot) return;
-        return JSON.parse(JSON.stringify(bot));
-      },
-    entityAt: (ctx) => (_x, _y) => {
-      const x = helpers.number(ctx, "x", _x);
-      const y = helpers.number(ctx, "y", _y);
-      return factory.entities.find((e) => e.x === x && e.y === y);
+    getEntity: (ctx) => (_id) => {
+      const id = helpers.entityID(ctx, "id", _id);
+      return findEntity(id);
     },
     entities: (__ctx) => () => JSON.parse(JSON.stringify(factory.entities)),
 
     transfer:
       (ctx) =>
-      async (_name, _x, _y, _pickup, _drop): Promise<boolean> => {
-        const name = helpers.string(ctx, "name", _name);
-        const x = helpers.number(ctx, "x", _x);
-        const y = helpers.number(ctx, "y", _y);
+      async (_from, _to, _pickup, _drop): Promise<boolean> => {
+        const botID = helpers.entityID(ctx, "from", _from);
+        const containerID = helpers.entityID(ctx, "to", _to);
         const pickup = _pickup as Item[];
-        const drop = _drop as Item[];
+        const drop = (_drop ?? []) as Item[];
 
-        const bot = findBot(name);
+        const bot = findEntity(botID, EntityType.Bot) as Bot;
         if (!bot) {
-          helpers.log(ctx, () => `bot "${name}" not found`);
+          helpers.log(ctx, () => `bot ${botID} not found`);
           return Promise.resolve(false);
         }
-        const container = findEntityAt(x, y);
+
+        const container = findEntity(containerID);
         if (!container) {
-          helpers.log(ctx, () => `container not found at [${x}, ${y}]`);
+          helpers.log(ctx, () => `container ${containerID} not found`);
           return Promise.resolve(false);
         }
+
+        if (!isEntityContainer(container)) {
+          helpers.log(ctx, () => `entity ${containerID} is not a container`);
+          return Promise.resolve(false);
+        }
+
         if (!adjacent(bot, container)) {
           helpers.log(ctx, () => "bot is not adjacent to container");
           return Promise.resolve(false);
@@ -121,7 +116,7 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
             container.cooldownUntil = Date.now() + container.cooldown;
             setTimeout(() => {
               if (container.inventory.length < container.maxInventory) {
-                container.inventory.push(container.dispensing);
+                container.inventory = new Array(container.maxInventory).fill(container.dispensing);
               }
             }, container.cooldown);
             break;
@@ -138,6 +133,7 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
                 .fill(null)
                 .map(() => container.potentialRequest[Math.floor(Math.random() * container.potentialRequest.length)]);
               container.currentRequest = newRequest;
+              container.maxInventory = newRequest.length;
             }
             break;
           }
@@ -147,18 +143,19 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
       },
     craft:
       (ctx) =>
-      async (_name, _x, _y): Promise<boolean> => {
-        const name = helpers.string(ctx, "name", _name);
-        const x = helpers.number(ctx, "x", _x);
-        const y = helpers.number(ctx, "y", _y);
-        const bot = findBot(name);
+      async (_botID, _crafterID): Promise<boolean> => {
+        const botID = helpers.entityID(ctx, "bot", _botID);
+        const crafterID = helpers.entityID(ctx, "crafter", _crafterID);
+
+        const bot = findEntity(botID, EntityType.Bot) as Bot;
         if (!bot) {
-          helpers.log(ctx, () => `bot "${name}" not found`);
+          helpers.log(ctx, () => `bot ${botID} not found`);
           return Promise.resolve(false);
         }
-        const crafter = findEntityAt<Crafter>(x, y, EntityType.Crafter);
+
+        const crafter = findEntity(crafterID, EntityType.Crafter) as Crafter;
         if (!crafter) {
-          helpers.log(ctx, () => `crafter not found at [${x}, ${y}]`);
+          helpers.log(ctx, () => `crafter ${crafterID} not found`);
           return Promise.resolve(false);
         }
 
@@ -180,5 +177,46 @@ export function NetscriptFactory(): InternalAPI<IFactory> {
           return Promise.resolve(true);
         });
       },
+    upgradeMaxInventory: (ctx) => (_id) => {
+      const id = helpers.entityID(ctx, "id", _id);
+      const container = findEntity(id);
+      if (!container) {
+        helpers.log(ctx, () => `container ${id} not found`);
+        return false;
+      }
+
+      if (!isEntityContainer(container)) {
+        helpers.log(ctx, () => `entity ${id} is not a container`);
+        return false;
+      }
+
+      const cost = upgradeMaxInventoryCost(container.type, container.maxInventory);
+      if (factory.bits < cost) {
+        helpers.log(ctx, () => `not enough bits to upgrade container`);
+        return false;
+      }
+
+      factory.bits -= cost;
+      container.maxInventory++;
+
+      return true;
+    },
+
+    getUpgradeMaxInventoryCost: (ctx) => (_id) => {
+      const id = helpers.entityID(ctx, "id", _id);
+      const container = findEntity(id);
+      if (!container) {
+        helpers.log(ctx, () => `container ${id} not found`);
+        return -1;
+      }
+
+      if (!isEntityContainer(container)) {
+        helpers.log(ctx, () => `entity ${id} is not a container`);
+        return -1;
+      }
+
+      return upgradeMaxInventoryCost(container.type, container.maxInventory);
+    },
+    reset: () => resetFactory,
   };
 }

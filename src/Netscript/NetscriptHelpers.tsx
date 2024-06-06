@@ -1,5 +1,11 @@
 import type { NetscriptContext } from "./APIWrapper";
-import type { RunningScript as IRunningScript, Person as IPerson, Server as IServer, ScriptArg } from "@nsdefs";
+import type {
+  RunningScript as IRunningScript,
+  Person as IPerson,
+  Server as IServer,
+  ScriptArg,
+  EntityID,
+} from "@nsdefs";
 
 import React from "react";
 import { killWorkerScript } from "./killWorkerScript";
@@ -74,6 +80,8 @@ export const helpers = {
   gangMember,
   gangTask,
   log,
+  coord2d,
+  entityID,
   filePath,
   scriptPath,
   getRunningScript,
@@ -150,6 +158,24 @@ function positiveNumber(ctx: NetscriptContext, argName: string, v: unknown): Pos
 function scriptArgs(ctx: NetscriptContext, args: unknown) {
   if (!isScriptArgs(args)) throw errorMessage(ctx, "'args' is not an array of script args", "TYPE");
   return args;
+}
+
+function isCoord2D(v: unknown): v is [number, number] {
+  return Array.isArray(v) && v.length === 2 && typeof v[0] === "number" && typeof v[1] === "number";
+}
+
+function coord2d(ctx: NetscriptContext, argName: string, v: unknown): [number, number] {
+  if (!isCoord2D(v)) throw errorMessage(ctx, `${argName} should be a [number, number], was ${v}`, "TYPE");
+  return v;
+}
+
+function isEntityID(v: unknown): v is EntityID {
+  return typeof v === "string" || isCoord2D(v);
+}
+
+function entityID(ctx: NetscriptContext, argName: string, v: unknown): EntityID {
+  if (!isEntityID(v)) throw errorMessage(ctx, `${argName} should be string | [number, number], was ${v}`, "TYPE");
+  return v;
 }
 
 function runOptions(ctx: NetscriptContext, threadOrOption: unknown): CompleteRunOptions {

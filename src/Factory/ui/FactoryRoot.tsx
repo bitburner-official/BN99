@@ -33,9 +33,18 @@ interface IColProps {
 const Col = ({ x }: IColProps): React.ReactElement => {
   return (
     <RowD>
-      {new Array(factorySize).fill(null).map((_, y) => (
-        <Cell key={y} x={x} y={y}></Cell>
-      ))}
+      {new Array(factorySize + 1).fill(null).map((_, y) => {
+        if (y === 0)
+          return (
+            <CellD
+              sx={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#00000000" }}
+              key={y}
+            >
+              <Typography>{x - 1}</Typography>
+            </CellD>
+          );
+        return <Cell key={y} x={x - 1} y={y - 1}></Cell>;
+      })}
     </RowD>
   );
 };
@@ -50,6 +59,23 @@ const Table = styled("div")({
   paddingRight: "2px",
 });
 
+const YHeader = () => {
+  return (
+    <RowD>
+      {new Array(factorySize + 1).fill(null).map((_, y) => {
+        return (
+          <CellD
+            sx={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#00000000" }}
+            key={y}
+          >
+            <Typography>{y === 0 ? "Y\\X" : y - 1}</Typography>
+          </CellD>
+        );
+      })}
+    </RowD>
+  );
+};
+
 interface IProps {}
 
 export const FactoryRoot = (__props: IProps): React.ReactElement => {
@@ -59,9 +85,10 @@ export const FactoryRoot = (__props: IProps): React.ReactElement => {
       <Typography variant="h4">Factory</Typography>
       <div style={{ display: "flex" }}>
         <Table>
-          {new Array(factorySize).fill(null).map((_, index) => (
-            <Col key={index} x={index} />
-          ))}
+          {new Array(factorySize + 1).fill(null).map((_, x) => {
+            if (x === 0) return <YHeader key={x} />;
+            return <Col key={x} x={x} />;
+          })}
         </Table>
       </div>
     </Container>

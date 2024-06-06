@@ -7,7 +7,9 @@ import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import OutboxIcon from "@mui/icons-material/Outbox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import BlockIcon from "@mui/icons-material/Block";
 import { Tooltip, Typography } from "@mui/material";
+import { isEntityContainer } from "../Factory";
 
 export const cellSize = 48;
 
@@ -30,23 +32,18 @@ const itemColorMap: Record<Item, string> = {
   [Item.ComplexG]: colorGreen,
 };
 
+const WallIcon = styled(BlockIcon)(defaultIconStyle);
 const BotIcon = styled(SmartToyIcon)(defaultIconStyle);
 const DispenserIcon = styled(OutboxIcon)((props: { dispenser: Dispenser; col: string }) => ({
   ...defaultIconStyle,
   color: new Date().getTime() > props.dispenser.cooldownUntil ? props.col : "gray",
 }));
 
-const DockIcon = styled(MoveToInboxIcon)({
-  ...defaultIconStyle,
-});
+const DockIcon = styled(MoveToInboxIcon)(defaultIconStyle);
 
-const CrafterIcon = styled(PrecisionManufacturingIcon)({
-  ...defaultIconStyle,
-});
+const CrafterIcon = styled(PrecisionManufacturingIcon)(defaultIconStyle);
 
-const ChestIcon = styled(CheckBoxOutlineBlankIcon)({
-  ...defaultIconStyle,
-});
+const ChestIcon = styled(CheckBoxOutlineBlankIcon)(defaultIconStyle);
 
 interface ITooltipContentProps {
   entity: Entity;
@@ -55,13 +52,16 @@ interface ITooltipContentProps {
 const TooltipContent = ({ entity, content }: ITooltipContentProps): React.ReactElement => {
   return (
     <>
-      <Typography>{entity.type}</Typography>
+      <Typography>
+        {entity.name} ({entity.type})
+      </Typography>
       {content}
     </>
   );
 };
 
 const TooltipInventory = ({ entity }: { entity: Entity }): React.ReactElement => {
+  if (!isEntityContainer(entity)) return <></>;
   return (
     <Typography component="span">
       {entity.inventory.map((item) => (
@@ -75,6 +75,9 @@ const TooltipInventory = ({ entity }: { entity: Entity }): React.ReactElement =>
 
 export const EntityIcon = ({ entity }: { entity: Entity }): React.ReactElement => {
   switch (entity.type) {
+    case EntityType.Wall: {
+      return <WallIcon />;
+    }
     case EntityType.Chest: {
       return (
         <Tooltip title={<TooltipContent entity={entity} content={<TooltipInventory entity={entity} />} />}>

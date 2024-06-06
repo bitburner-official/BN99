@@ -5153,6 +5153,7 @@ export enum EntityType {
   Dock = "dock",
   Crafter = "crafter",
   Chest = "chest",
+  Wall = "wall",
 }
 
 export enum Item {
@@ -5165,43 +5166,47 @@ export enum Item {
 }
 
 export interface BaseEntity {
+  name: string;
   type: EntityType;
   x: number;
   y: number;
 }
 
-export interface Bot extends InventoryEntity {
+export interface Bot extends ContainerEntity {
   type: EntityType.Bot;
-  name: string;
   energy: number;
 }
 
-export interface InventoryEntity extends BaseEntity {
+export interface ContainerEntity extends BaseEntity {
   inventory: Item[];
   maxInventory: number;
 }
 
-export interface Dispenser extends InventoryEntity {
+export interface Dispenser extends ContainerEntity {
   type: EntityType.Dispenser;
   dispensing: Item;
   cooldown: number;
   cooldownUntil: number;
 }
 
-export interface Dock extends InventoryEntity {
+export interface Dock extends ContainerEntity {
   type: EntityType.Dock;
   potentialRequest: Item[];
   potentialRequestCount: number;
   currentRequest: Item[];
 }
 
-export interface Chest extends InventoryEntity {
+export interface Chest extends ContainerEntity {
   type: EntityType.Chest;
 }
 
-export interface Crafter extends InventoryEntity {
+export interface Crafter extends ContainerEntity {
   type: EntityType.Crafter;
   recipe: Recipe;
+}
+
+export interface Wall extends BaseEntity {
+  type: EntityType.Wall;
 }
 
 export interface Recipe {
@@ -5209,7 +5214,9 @@ export interface Recipe {
   output: Item[];
 }
 
-export type Entity = Bot | Dispenser | Dock | Crafter | Chest;
+export type EntityID = string | [number, number];
+
+export type Entity = Bot | Dispenser | Dock | Crafter | Chest | Wall;
 
 interface Factory {
   /**
@@ -5218,28 +5225,86 @@ interface Factory {
    * RAM cost: 0 GB
    * @returns true if the move succeeded, false otherwise.
    */
-  moveBot(name: string, x: number, y: number): Promise<boolean>;
+  moveBot(name: EntityID, coord: [number, number]): Promise<boolean>;
 
   /**
-   * Get information about a bot
+   * Get entity
+   * @remarks
+   * RAM cost: 0GB
+   * @returns entity with this ID
+   */
+  getEntity(entity: EntityID): Entity | undefined;
+
+  /**
+   * Get all entities
    * @remarks
    * RAM cost: 0 GB
-   * @returns bot information
+   * @returns all entities
    */
-  getBot(name: string): Bot | undefined;
-
-  entityAt(x: number, y: number): Entity | undefined;
-
   entities(): Entity[];
 
-  transfer(name: string, x: number, y: number, pickup: Item[], drop: Item[]): Promise<boolean>;
+  /**
+   * Transfer items between entities
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the transfer succeeded, false otherwise.
+   */
+  transfer(from: EntityID, to: EntityID, pickup: Item[], drop?: Item[]): Promise<boolean>;
 
-  craft(name: string, x: number, y: number): Promise<boolean>;
+  /**
+   * Make a bot use a crafter in order to craft an item.
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the crafting succeeded, false otherwise.
+   */
+  craft(bot: EntityID, crafter: EntityID): Promise<boolean>;
 
+  /**
+   * get number of bits available
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns number of bits available
+   */
   getBits(): number;
 
+  /**
+   * Get the price of the next bot
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns price of the next bot
+   */
   getBotPrice(): number;
-  purchaseBot(name: string, x: number, y: number): boolean;
+
+  /**
+   * Purchase a new bot and place it at location [x, y]
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the purchase succeeded, false otherwise.
+   */
+  purchaseBot(name: string, coord: [number, number]): boolean;
+
+  /**
+   * Upgrade the inventory of an entity
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeMaxInventory(entity: EntityID): boolean;
+
+  /**
+   * Get the cost of upgrading the inventory of an entity
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the inventory of an entity, -1 on failure.
+   */
+  getUpgradeMaxInventoryCost(entity: EntityID): number;
+
+  /**
+   * Completely reset the factory, for debug purposes
+   * @remarks
+   * RAM cost: 0 GB
+   */
+  reset(): void;
 }
 
 /** @public */
