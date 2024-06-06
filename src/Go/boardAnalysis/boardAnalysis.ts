@@ -615,9 +615,11 @@ export function boardFromBoardString(boardString: string): Board {
   // Turn the SimpleBoard string into a string array, allowing access of each point via indexes e.g. [0][1]
   const boardSize = Math.round(Math.sqrt(boardString.length));
   const boardTiles = boardString.split("");
-  const simpleBoardArray = Array(boardSize).map((_, index) =>
-    boardTiles.slice(index * boardSize, (index + 1) * boardSize).join(""),
-  );
+
+  // Split the single board string into rows of length equal to the board width
+  const simpleBoardArray = Array(boardSize)
+    .fill("")
+    .map((_, index) => boardTiles.slice(index * boardSize, (index + 1) * boardSize).join(""));
 
   return boardFromSimpleBoard(simpleBoardArray);
 }
