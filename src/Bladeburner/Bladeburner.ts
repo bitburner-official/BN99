@@ -117,7 +117,6 @@ export class Bladeburner {
   }
 
   calculateStaminaPenalty(): number {
-    if (this.stamina === this.maxStamina) return 1;
     return Math.min(1, this.stamina / (0.5 * this.maxStamina));
   }
 
@@ -1286,13 +1285,16 @@ export class Bladeburner {
 
   calculateMaxStamina(): void {
     const baseStamina = Math.pow(this.getEffectiveSkillLevel(Player, "agility"), 0.8);
+    // Min value of maxStamina is an arbitrarily small positive value. It must not be 0 to avoid NaN stamina penalty.
     const maxStamina = clampNumber(
       (baseStamina + this.staminaBonus) *
         this.getSkillMult(BladeMultName.stamina) *
         Player.mults.bladeburner_max_stamina,
-      0,
+      1e-9,
     );
-    if (this.maxStamina === maxStamina) return;
+    if (this.maxStamina === maxStamina) {
+      return;
+    }
     // If max stamina changed, adjust stamina accordingly
     const oldMax = this.maxStamina;
     this.maxStamina = maxStamina;
@@ -1459,6 +1461,16 @@ export class Bladeburner {
     loadOperationsData(operationsData, bladeburner.operations);
     // Regenerate skill multiplier data, which is not included in savedata
     bladeburner.updateSkillMultipliers();
+    // If stamina or maxStamina is invalid, we set both of them to 1 and recalculate them.
+    if (
+      !Number.isFinite(bladeburner.stamina) ||
+      !Number.isFinite(bladeburner.maxStamina) ||
+      bladeburner.maxStamina === 0
+    ) {
+      bladeburner.stamina = 1;
+      bladeburner.maxStamina = 1;
+      bladeburner.calculateMaxStamina();
+    }
     return bladeburner;
   }
 }
