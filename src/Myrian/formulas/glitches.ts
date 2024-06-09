@@ -13,11 +13,11 @@ export const glitchMaxLvl: Record<Glitch, number> = {
 };
 
 export const giltchMultCoefficients: Record<Glitch, number> = {
-  [Glitch.Segmentation]: 0, // 1,
+  [Glitch.Segmentation]: 1,
   [Glitch.Roaming]: 0, // 1,
   [Glitch.Encryption]: 0, // 0.1,
   [Glitch.Magnetism]: 0.2,
-  [Glitch.Rust]: 0, // 1,
+  [Glitch.Rust]: 1,
   [Glitch.Friction]: 0.2,
   [Glitch.Isolation]: 0.2,
   [Glitch.Virtualization]: 0.2,

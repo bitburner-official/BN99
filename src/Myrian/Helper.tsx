@@ -1,5 +1,5 @@
 import { DeviceType, Component, Lock, Glitch } from "@nsdefs";
-import { Myrian } from "./Myrian";
+import { Myrian, findDevice } from "./Myrian";
 import { getNextISocketRequest } from "./formulas/formulas";
 
 export const myrianSize = 12;
@@ -21,6 +21,7 @@ const defaultMyrian: Myrian = {
   totalVulns: 0,
   devices: [],
   glitches: { ...defaultGlitches },
+  rust: {},
 };
 
 export const myrian: Myrian = defaultMyrian;
@@ -134,6 +135,7 @@ export const resetMyrian = () => {
   myrian.totalVulns = 0;
   myrian.devices = [];
   myrian.glitches = { ...defaultGlitches };
+  myrian.rust = {};
 
   Object.assign(myrian, defaultMyrian);
 
@@ -155,5 +157,25 @@ setInterval(() => {
     device.energy = Math.min(device.energy + up, device.maxEnergy);
   });
 }, 1000);
+
+setInterval(() => {
+  const segmentation = myrian.glitches[Glitch.Segmentation];
+  for (let i = 0; i < segmentation; i++) {
+    const x = Math.floor(Math.random() * myrianSize);
+    const y = Math.floor(Math.random() * myrianSize);
+    if (findDevice([x, y])) continue;
+    NewLock(`lock-${x}-${y}`, x, y);
+  }
+}, 30000);
+
+setInterval(() => {
+  myrian.rust = {};
+  const rust = myrian.glitches[Glitch.Rust];
+  for (let i = 0; i < rust * 3; i++) {
+    const x = Math.floor(Math.random() * myrianSize);
+    const y = Math.floor(Math.random() * myrianSize);
+    myrian.rust[`${x}:${y}`] = true;
+  }
+}, 30000);
 
 resetMyrian();

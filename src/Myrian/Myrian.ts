@@ -22,6 +22,7 @@ export interface Myrian {
   totalVulns: number;
   devices: Device[];
   glitches: Record<Glitch, number>;
+  rust: Record<string, boolean>;
 }
 
 export const distance = (a: Device, b: Device) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -133,3 +134,15 @@ export const getTotalGlitchMult = () =>
   Object.entries(myrian.glitches).reduce((acc, [glitch, lvl]) => {
     return acc * glitchMult(glitch as Glitch, lvl);
   }, 1);
+
+const rustStats: (keyof Bus)[] = ["moveLvl", "transferLvl", "reduceLvl", "installLvl", "maxEnergy"];
+
+export const rustBus = (bus: Bus, rust: number) => {
+  const potential = rustStats.filter((stat) => {
+    const value = bus[stat];
+    if (typeof value !== "number") return false;
+    return value > 0;
+  });
+  const chosen = potential[Math.floor(Math.random() * potential.length)];
+  (bus[chosen] as any) = Math.max(0, (bus[chosen] as any) - rust * 0.1) as any;
+};

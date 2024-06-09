@@ -24,6 +24,7 @@ import {
   isDeviceBus,
   removeDevice,
   getTotalGlitchMult,
+  rustBus,
 } from "../Myrian/Myrian";
 import {
   deviceCost,
@@ -118,6 +119,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             }
             bus.x = x;
             bus.y = y;
+            if (myrian.rust[`${x}:${y}`]) rustBus(bus, myrian.glitches[Glitch.Rust]);
             return Promise.resolve(true);
           })
           .finally(() => {

@@ -72,9 +72,17 @@ By default bus lose 0 energy when moving. But when this glitch is active they st
 
 When Friction is active busses move more slowly.
 
+## Rust
+
+When rust is active, hidden tiles are set on the Myrian. When a bus steps on one of these hidden tiles one of their upgrade lowers. Higher Rust level means lowers by a larger amount and more rust tiles are set.
+
 ### Isolation
 
 When Isolation is active busses transfer and charge more slowly.
+
+## Segmentation
+
+When Segmentation is active random Locks will spawn on the Myrian. You have to remove these locks or the bord will be overrun with Locks and you won't be able to move.
 
 ### Virtualization
 
