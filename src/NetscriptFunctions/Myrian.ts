@@ -134,15 +134,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        const fromFinalSize = fromDevice.content.length + input.length - output.length;
-        const toFinalSize = toDevice.content.length + output.length - input.length;
+        const fromFinalSize = fromDevice.content.length - input.length + output.length;
+        const toFinalSize = toDevice.content.length - output.length + input.length;
         if (fromFinalSize > fromDevice.maxContent || toFinalSize > toDevice.maxContent) {
           helpers.log(ctx, () => "not enough space in one of the containers");
           return Promise.resolve(false);
         }
 
-        const fromHas = input.every((item) => toDevice.content.includes(item));
-        const toHas = output.every((item) => fromDevice.content.includes(item));
+        const fromHas = input.every((item) => fromDevice.content.includes(item));
+        const toHas = output.every((item) => toDevice.content.includes(item));
         if (!fromHas || !toHas) {
           helpers.log(ctx, () => "one of the entities does not have the items");
           return Promise.resolve(false);
@@ -161,13 +161,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return helpers
           .netscriptDelay(ctx, transferSpeed(bus.transferLvl), true)
           .then(() => {
-            fromDevice.isBusy = false;
-            toDevice.isBusy = false;
-            toDevice.content = toDevice.content.filter((item) => !input.includes(item));
-            toDevice.content.push(...output);
+            toDevice.content = toDevice.content.filter((item) => !output.includes(item));
+            toDevice.content.push(...input);
 
-            fromDevice.content = fromDevice.content.filter((item) => !output.includes(item));
-            fromDevice.content.push(...input);
+            fromDevice.content = fromDevice.content.filter((item) => !input.includes(item));
+            fromDevice.content.push(...output);
 
             switch (container.type) {
               case DeviceType.ISocket: {
