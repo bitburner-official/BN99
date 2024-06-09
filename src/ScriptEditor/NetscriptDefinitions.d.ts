@@ -5248,7 +5248,7 @@ export interface ContainerDevice extends BaseDevice {
 export interface ISocket extends ContainerDevice {
   type: DeviceType.ISocket;
   emitting: Component;
-  cooldown: number;
+  emissionLvl: number;
   cooldownUntil: number;
 }
 
@@ -5396,6 +5396,86 @@ interface Myrian {
    * @returns cost of upgrading the tier of a device, -1 on failure.
    */
   getUpgradeTierCost(device: DeviceID): number;
+
+  /**
+   * Get the cost of upgrading the emission of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the emission of a device, -1 on failure.
+   */
+  getUpgradeEmissionLvlCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the emissionLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeEmissionLvl(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the moveLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the moveLvl of a device, -1 on failure.
+   */
+  getUpgradeMoveLvlCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the moveLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeMoveLvl(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the transferLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the transferLvl of a device, -1 on failure.
+   */
+  getUpgradeTransferLvlCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the moveLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeTransferLvl(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the reduceLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the reduceLvl of a device, -1 on failure.
+   */
+  getUpgradeReduceLvlCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the reduceLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeReduceLvl(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the installLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the installLvl of a device, -1 on failure.
+   */
+  getUpgradeInstallLvlCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the installLvl of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeInstallLvl(device: DeviceID): boolean;
 }
 
 /** @public */

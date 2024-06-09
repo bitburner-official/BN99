@@ -20,10 +20,11 @@ export const upgradeMaxContentCost = (type: DeviceType, currentMaxContent: numbe
   exp(maxContentScale[type], currentMaxContent);
 
 export const busPrice = (currentBusses: number): number => Math.pow(2, currentBusses + 3);
-export const moveSpeed = (level: number) => 1000 / (level + 9);
-export const reduceSpeed = (level: number) => 50000 / (level + 9);
-export const transferSpeed = (level: number) => 1000 / (level + 9);
-export const installSpeed = (level: number) => 100000 / (level + 9);
+export const moveSpeed = (level: number) => 1000 / (level + 10);
+export const reduceSpeed = (level: number) => 50000 / (level + 10);
+export const transferSpeed = (level: number) => 1000 / (level + 10);
+export const installSpeed = (level: number) => 100000 / (level + 10);
+export const isocketSpeed = (level: number) => 10000 / (level + 10);
 
 const countDevices = (type: DeviceType) => myrian.devices.reduce((acc, d) => (d.type === type ? acc + 1 : acc), 0);
 
@@ -46,12 +47,6 @@ export const getNextISocketRequest = (tier: number) => {
     .map(() => potential[Math.floor(Math.random() * potential.length)]);
 };
 
-(() => {
-  for (let i = 0; i < 10; i++) {
-    console.log(getNextISocketRequest(0));
-  }
-})();
-
 export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -62,6 +57,61 @@ export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
 };
 
 export const tierCost = (type: DeviceType, tier: number) => exp(tierScale[type], tier);
+
+export const emissionScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.ISocket]: [2, 1, 3, 0],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+};
+
+export const emissionCost = (type: DeviceType, emissionLvl: number) => exp(emissionScale[type], emissionLvl);
+
+export const moveLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [2, 1, 3, 0],
+  [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+};
+
+export const moveLvlCost = (type: DeviceType, moveLvl: number) => exp(moveLvlScale[type], moveLvl);
+
+export const transferLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [2, 1, 3, 0],
+  [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+};
+
+export const transferLvlCost = (type: DeviceType, transferLvl: number) => exp(transferLvlScale[type], transferLvl);
+
+export const reduceLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [2, 1, 3, 0],
+  [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+};
+
+export const reduceLvlCost = (type: DeviceType, reduceLvl: number) => exp(reduceLvlScale[type], reduceLvl);
+
+export const installLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [2, 1, 3, 0],
+  [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+};
+
+export const installLvlCost = (type: DeviceType, installLvl: number) => exp(installLvlScale[type], installLvl);
 
 /**
 glitches:

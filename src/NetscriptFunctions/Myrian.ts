@@ -25,11 +25,17 @@ import {
 } from "../Myrian/Myrian";
 import {
   deviceCost,
+  emissionCost,
   getNextISocketRequest,
+  installLvlCost,
   installSpeed,
+  isocketSpeed,
+  moveLvlCost,
   moveSpeed,
+  reduceLvlCost,
   reduceSpeed,
   tierCost,
+  transferLvlCost,
   transferSpeed,
   upgradeMaxContentCost,
 } from "../Myrian/formulas/formulas";
@@ -39,6 +45,10 @@ import { componentTiers } from "../Myrian/formulas/components";
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
     DEUBG_RESET: () => resetMyrian,
+    DEBUG_GIVE_VULNS: (ctx) => (_amount) => {
+      const amount = helpers.number(ctx, "amount", _amount);
+      myrian.vulns += amount;
+    },
     getDevice: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "id", _id);
       const device = findDevice(id);
@@ -170,10 +180,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
             switch (container.type) {
               case DeviceType.ISocket: {
-                container.cooldownUntil = Date.now() + container.cooldown;
+                const cooldown = isocketSpeed(container.emissionLvl);
+                container.cooldownUntil = Date.now() + cooldown;
                 setTimeout(() => {
                   container.content = new Array(container.maxContent).fill(container.emitting);
-                }, container.cooldown);
+                }, cooldown);
                 break;
               }
 
@@ -409,6 +420,13 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           placedDevice.isBusy = false;
         });
     },
+    getUpgradeTierCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("tier" in device)) return -1;
+      return tierCost(device.type, device.tier);
+    },
     upgradeTier: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
@@ -420,16 +438,95 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       device.tier++;
       return true;
     },
-    getUpgradeTierCost: (ctx) => (_id) => {
+    getUpgradeEmissionLvlCost: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("tier" in device)) return -1;
-      return tierCost(device.type, device.tier);
+      if (!("emissionLvl" in device)) return -1;
+      return emissionCost(device.type, device.emissionLvl);
     },
-    DEBUG_GIVE_VULNS: (ctx) => (_amount) => {
-      const amount = helpers.number(ctx, "amount", _amount);
-      myrian.vulns += amount;
+    upgradeEmissionLvl: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("emissionLvl" in device)) return false;
+      const cost = emissionCost(device.type, device.emissionLvl);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.emissionLvl++;
+      return true;
+    },
+    getUpgradeMoveLvlCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("moveLvl" in device)) return -1;
+      return moveLvlCost(device.type, device.moveLvl);
+    },
+    upgradeMoveLvl: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("moveLvl" in device)) return false;
+      const cost = moveLvlCost(device.type, device.moveLvl);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.moveLvl++;
+      return true;
+    },
+    getUpgradeTransferLvlCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("transferLvl" in device)) return -1;
+      return transferLvlCost(device.type, device.transferLvl);
+    },
+    upgradeTransferLvl: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("transferLvl" in device)) return false;
+      const cost = transferLvlCost(device.type, device.transferLvl);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.transferLvl++;
+      return true;
+    },
+    getUpgradeReduceLvlCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("reduceLvl" in device)) return -1;
+      return reduceLvlCost(device.type, device.reduceLvl);
+    },
+    upgradeReduceLvl: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("reduceLvl" in device)) return false;
+      const cost = reduceLvlCost(device.type, device.reduceLvl);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.reduceLvl++;
+      return true;
+    },
+    getUpgradeInstallLvlCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("installLvl" in device)) return -1;
+      return installLvlCost(device.type, device.installLvl);
+    },
+    upgradeInstallLvl: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("installLvl" in device)) return false;
+      const cost = installLvlCost(device.type, device.installLvl);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.installLvl++;
+      return true;
     },
   };
 }

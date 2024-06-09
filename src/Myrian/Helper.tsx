@@ -22,10 +22,10 @@ export const NewBus = (name: string, x: number, y: number) => {
     content: [],
     maxContent: 1,
 
-    moveLvl: 1,
-    transferLvl: 1,
-    reduceLvl: 1,
-    installLvl: 1,
+    moveLvl: 0,
+    transferLvl: 0,
+    reduceLvl: 0,
+    installLvl: 0,
     // energy: 16,
   });
 };
@@ -63,7 +63,7 @@ export const NewISocket = (name: string, x: number, y: number, dispensing: Compo
     x,
     y,
     emitting: dispensing,
-    cooldown: 10000,
+    emissionLvl: 0,
     cooldownUntil: 0,
     content: [dispensing],
     maxContent: 1,
