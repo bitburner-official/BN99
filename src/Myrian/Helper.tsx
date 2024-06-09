@@ -51,7 +51,7 @@ export const NewReducer = (name: string, x: number, y: number) => {
     y,
     content: [],
     maxContent: 2,
-    tier: 0,
+    tier: 1,
   });
 };
 

@@ -24,7 +24,7 @@ export const moveSpeed = (level: number) => 1000 / (level + 10);
 export const reduceSpeed = (level: number) => 50000 / (level + 10);
 export const transferSpeed = (level: number) => 1000 / (level + 10);
 export const installSpeed = (level: number) => 100000 / (level + 10);
-export const isocketSpeed = (level: number) => 10000 / (level + 10);
+export const isocketSpeed = (level: number) => 100000 / (level + 10);
 
 const countDevices = (type: DeviceType) => myrian.devices.reduce((acc, d) => (d.type === type ? acc + 1 : acc), 0);
 
