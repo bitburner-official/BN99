@@ -104,7 +104,7 @@ export const vulnsMap: Record<Component, number> = {
   [Component.W7]: 16384,
 };
 
-export const isDeviceContainer = (device: BaseDevice): device is ContainerDevice => "inventory" in device;
+export const isDeviceContainer = (device: BaseDevice): device is ContainerDevice => "content" in device;
 
 export const isDeviceBus = (d: Device): d is Bus => d.type === DeviceType.Bus;
 export const isDeviceISocket = (d: Device): d is ISocket => d.type === DeviceType.ISocket;

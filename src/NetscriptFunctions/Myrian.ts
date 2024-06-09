@@ -78,16 +78,21 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         }
 
         bus.isBusy = true;
-        return helpers.netscriptDelay(ctx, moveSpeed(bus.moveLvl), true).then(() => {
-          bus.isBusy = false;
-          if (findDevice([x, y])) {
-            helpers.log(ctx, () => `[${x}, ${y}] is occupied`);
-            return Promise.resolve(false);
-          }
-          bus.x = x;
-          bus.y = y;
-          return Promise.resolve(true);
-        });
+        return helpers
+          .netscriptDelay(ctx, moveSpeed(bus.moveLvl), true)
+          .then(() => {
+            bus.isBusy = false;
+            if (findDevice([x, y])) {
+              helpers.log(ctx, () => `[${x}, ${y}] is occupied`);
+              return Promise.resolve(false);
+            }
+            bus.x = x;
+            bus.y = y;
+            return Promise.resolve(true);
+          })
+          .finally(() => {
+            bus.isBusy = false;
+          });
       },
     transfer:
       (ctx) =>
@@ -153,39 +158,45 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         fromDevice.isBusy = true;
         toDevice.isBusy = true;
 
-        return helpers.netscriptDelay(ctx, transferSpeed(bus.transferLvl), true).then(() => {
-          fromDevice.isBusy = false;
-          toDevice.isBusy = false;
-          toDevice.content = toDevice.content.filter((item) => !input.includes(item));
-          toDevice.content.push(...output);
+        return helpers
+          .netscriptDelay(ctx, transferSpeed(bus.transferLvl), true)
+          .then(() => {
+            fromDevice.isBusy = false;
+            toDevice.isBusy = false;
+            toDevice.content = toDevice.content.filter((item) => !input.includes(item));
+            toDevice.content.push(...output);
 
-          fromDevice.content = fromDevice.content.filter((item) => !output.includes(item));
-          fromDevice.content.push(...input);
+            fromDevice.content = fromDevice.content.filter((item) => !output.includes(item));
+            fromDevice.content.push(...input);
 
-          switch (container.type) {
-            case DeviceType.ISocket: {
-              container.cooldownUntil = Date.now() + container.cooldown;
-              setTimeout(() => {
-                container.content = new Array(container.maxContent).fill(container.emitting);
-              }, container.cooldown);
-              break;
-            }
-
-            case DeviceType.OSocket: {
-              if (inventoryMatches(container.currentRequest, container.content)) {
-                const gain = container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0);
-                myrian.vulns += gain;
-                myrian.totalVulns += gain;
-                container.content = [];
-                const request = getNextISocketRequest(container.tier);
-                container.currentRequest = request;
-                container.maxContent = request.length;
+            switch (container.type) {
+              case DeviceType.ISocket: {
+                container.cooldownUntil = Date.now() + container.cooldown;
+                setTimeout(() => {
+                  container.content = new Array(container.maxContent).fill(container.emitting);
+                }, container.cooldown);
+                break;
               }
-              break;
+
+              case DeviceType.OSocket: {
+                if (inventoryMatches(container.currentRequest, container.content)) {
+                  const gain = container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0);
+                  myrian.vulns += gain;
+                  myrian.totalVulns += gain;
+                  container.content = [];
+                  const request = getNextISocketRequest(container.tier);
+                  container.currentRequest = request;
+                  container.maxContent = request.length;
+                }
+                break;
+              }
             }
-          }
-          return Promise.resolve(true);
-        });
+            return Promise.resolve(true);
+          })
+          .finally(() => {
+            fromDevice.isBusy = false;
+            toDevice.isBusy = false;
+          });
       },
     reduce:
       (ctx) =>
@@ -224,12 +235,16 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
         bus.isBusy = true;
         reducer.isBusy = true;
-        return helpers.netscriptDelay(ctx, reduceSpeed(bus.reduceLvl), true).then(() => {
-          bus.isBusy = false;
-          reducer.isBusy = false;
-          reducer.content = [recipe.output];
-          return Promise.resolve(true);
-        });
+        return helpers
+          .netscriptDelay(ctx, reduceSpeed(bus.reduceLvl), true)
+          .then(() => {
+            reducer.content = [recipe.output];
+            return Promise.resolve(true);
+          })
+          .finally(() => {
+            bus.isBusy = false;
+            reducer.isBusy = false;
+          });
       },
     upgradeMaxContent: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "id", _id);
@@ -327,32 +342,37 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const lockName = `lock-${busID}`;
       const lock = NewLock(lockName, x, y);
       lock.isBusy = true;
-      return helpers.netscriptDelay(ctx, installSpeed(bus.installLvl), true).then(() => {
-        bus.isBusy = false;
-        removeDevice(lockName);
-        switch (deviceType) {
-          case DeviceType.Bus: {
-            NewBus(name, x, y);
-            break;
+      return helpers
+        .netscriptDelay(ctx, installSpeed(bus.installLvl), true)
+        .then(() => {
+          bus.isBusy = false;
+          removeDevice(lockName);
+          switch (deviceType) {
+            case DeviceType.Bus: {
+              NewBus(name, x, y);
+              break;
+            }
+            case DeviceType.ISocket: {
+              NewISocket(name, x, y, componentTiers[0][Math.floor(Math.random() * componentTiers[0].length)]);
+              break;
+            }
+            case DeviceType.OSocket: {
+              NewOSocket(name, x, y);
+              break;
+            }
+            case DeviceType.Reducer: {
+              NewReducer(name, x, y);
+              break;
+            }
+            case DeviceType.Cache: {
+              NewCache(name, x, y);
+            }
           }
-          case DeviceType.ISocket: {
-            NewISocket(name, x, y, componentTiers[0][Math.floor(Math.random() * componentTiers[0].length)]);
-            break;
-          }
-          case DeviceType.OSocket: {
-            NewOSocket(name, x, y);
-            break;
-          }
-          case DeviceType.Reducer: {
-            NewReducer(name, x, y);
-            break;
-          }
-          case DeviceType.Cache: {
-            NewCache(name, x, y);
-          }
-        }
-        return Promise.resolve(true);
-      });
+          return Promise.resolve(true);
+        })
+        .finally(() => {
+          bus.isBusy = false;
+        });
     },
     uninstallDevice: (ctx) => async (_bus, _coord) => {
       const busID = helpers.string(ctx, "bus", _bus);
@@ -377,12 +397,18 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
       bus.isBusy = true;
       placedDevice.isBusy = true;
-      return helpers.netscriptDelay(ctx, installSpeed(bus.installLvl), true).then(() => {
-        bus.isBusy = false;
-        placedDevice.isBusy = false;
-        removeDevice([x, y]);
-        return Promise.resolve(true);
-      });
+      return helpers
+        .netscriptDelay(ctx, installSpeed(bus.installLvl), true)
+        .then(() => {
+          bus.isBusy = false;
+          placedDevice.isBusy = false;
+          removeDevice([x, y]);
+          return Promise.resolve(true);
+        })
+        .finally(() => {
+          bus.isBusy = false;
+          placedDevice.isBusy = false;
+        });
     },
   };
 }
