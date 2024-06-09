@@ -45,7 +45,7 @@ import { downloadContentAsFile } from "./utils/FileUtils";
 import { showAPIBreaks } from "./utils/APIBreaks/APIBreak";
 import { breakInfos261 } from "./utils/APIBreaks/2.6.1";
 import { handleGetSaveDataError } from "./Netscript/ErrorMessages";
-import { factory, loadFactory } from "./Factory/Helper";
+import { myrian, loadMyrian } from "./Myrian/Helper";
 
 /* SaveObject.js
  *  Defines the object used to save/load games
@@ -118,7 +118,7 @@ class BitburnerSaveObject {
     this.VersionSave = JSON.stringify(CONSTANTS.VersionNumber);
     this.LastExportBonus = JSON.stringify(ExportBonus.LastExportBonus);
     this.StaneksGiftSave = JSON.stringify(staneksGift);
-    this.FactorySave = JSON.stringify(factory);
+    this.FactorySave = JSON.stringify(myrian);
     this.GoSave = JSON.stringify(getGoSave());
 
     if (Player.gang) this.AllGangsSave = JSON.stringify(AllGangs);
@@ -766,7 +766,7 @@ async function loadGame(saveData: SaveData): Promise<boolean> {
   }
 
   if (Object.hasOwn(saveObj, "FactorySave")) {
-    loadFactory(saveObj.FactorySave);
+    loadMyrian(saveObj.FactorySave);
   } else {
     console.warn(`Could not load Factory from save`);
   }

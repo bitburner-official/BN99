@@ -5143,168 +5143,238 @@ interface Stanek {
   acceptGift(): boolean;
 }
 
-export enum Tile {
-  Empty = 0,
+export enum DeviceType {
+  Bus = "bus",
+  ISocket = "isocket",
+  OSocket = "osocket",
+  Reducer = "reducer",
+  Cache = "cache",
+  Lock = "lock",
 }
 
-export enum EntityType {
-  Bot = "bot",
-  Dispenser = "dispenser",
-  Dock = "dock",
-  Crafter = "crafter",
-  Chest = "chest",
-  Wall = "wall",
+export enum Component {
+  // tier 0
+  R0 = "r0",
+  G0 = "g0",
+  B0 = "b0",
+
+  // tier 1
+  R1 = "r1",
+  G1 = "g1",
+  B1 = "b1",
+
+  Y1 = "y1",
+  C1 = "c1",
+  M1 = "m1",
+
+  // tier 2
+  R2 = "r2",
+  G2 = "g2",
+  B2 = "b2",
+
+  Y2 = "y2",
+  C2 = "c2",
+  M2 = "m2",
+
+  W2 = "w2",
+
+  // tier 3
+  R3 = "r3",
+  G3 = "g3",
+  B3 = "b3",
+
+  Y3 = "y3",
+  C3 = "c3",
+  M3 = "m3",
+
+  W3 = "w3",
+
+  // tier 4
+  R4 = "r4",
+  G4 = "g4",
+  B4 = "b4",
+
+  Y4 = "y4",
+  C4 = "c4",
+  M4 = "m4",
+
+  W4 = "w4",
+
+  // tier 5
+  R5 = "r5",
+  G5 = "g5",
+  B5 = "b5",
+
+  Y5 = "y5",
+  C5 = "c5",
+  M5 = "m5",
+
+  W5 = "w5",
+
+  // tier 6
+  Y6 = "y6",
+  C6 = "c6",
+  M6 = "m6",
+
+  W6 = "w6",
+
+  // tier 7
+  W7 = "w7",
 }
 
-export enum Item {
-  BasicR = "basicr",
-  BasicG = "basicg",
-  BasicB = "basicb",
-  ComplexR = "complexr",
-  ComplexG = "complexg",
-  ComplexB = "complexb",
-}
-
-export interface BaseEntity {
+export interface BaseDevice {
   name: string;
-  type: EntityType;
+  type: DeviceType;
   x: number;
   y: number;
+  busy: boolean;
 }
 
-export interface Bot extends ContainerEntity {
-  type: EntityType.Bot;
-  energy: number;
+export interface Bus extends ContainerDevice {
+  type: DeviceType.Bus;
+  moveLvl: number;
+  transferLvl: number;
+  reduceLvl: number;
+  installLvl: number;
+  // energy: number;
+  // maxEnergy: number;
 }
 
-export interface ContainerEntity extends BaseEntity {
-  inventory: Item[];
-  maxInventory: number;
+export interface ContainerDevice extends BaseDevice {
+  content: Component[];
+  maxContent: number;
 }
 
-export interface Dispenser extends ContainerEntity {
-  type: EntityType.Dispenser;
-  dispensing: Item;
+export interface ISocket extends ContainerDevice {
+  type: DeviceType.ISocket;
+  emitting: Component;
   cooldown: number;
   cooldownUntil: number;
 }
 
-export interface Dock extends ContainerEntity {
-  type: EntityType.Dock;
-  potentialRequest: Item[];
-  potentialRequestCount: number;
-  currentRequest: Item[];
+export interface OSocket extends ContainerDevice {
+  type: DeviceType.OSocket;
+  tier: number;
+  currentRequest: Component[];
 }
 
-export interface Chest extends ContainerEntity {
-  type: EntityType.Chest;
+export interface Cache extends ContainerDevice {
+  type: DeviceType.Cache;
 }
 
-export interface Crafter extends ContainerEntity {
-  type: EntityType.Crafter;
-  recipe: Recipe;
+export interface Reducer extends ContainerDevice {
+  type: DeviceType.Reducer;
+  tier: number;
 }
 
-export interface Wall extends BaseEntity {
-  type: EntityType.Wall;
+export interface Lock extends BaseDevice {
+  type: DeviceType.Lock;
 }
 
 export interface Recipe {
-  input: Item[];
-  output: Item[];
+  input: Component[];
+  output: Component;
 }
 
-export type EntityID = string | [number, number];
+export type DeviceID = string | [number, number];
 
-export type Entity = Bot | Dispenser | Dock | Crafter | Chest | Wall;
+export type Device = Bus | ISocket | OSocket | Reducer | Cache | Lock;
 
-interface Factory {
+interface Myrian {
   /**
-   * Move a bot
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns true if the move succeeded, false otherwise.
-   */
-  moveBot(name: EntityID, coord: [number, number]): Promise<boolean>;
-
-  /**
-   * Get entity
-   * @remarks
-   * RAM cost: 0GB
-   * @returns entity with this ID
-   */
-  getEntity(entity: EntityID): Entity | undefined;
-
-  /**
-   * Get all entities
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns all entities
-   */
-  entities(): Entity[];
-
-  /**
-   * Transfer items between entities
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns true if the transfer succeeded, false otherwise.
-   */
-  transfer(from: EntityID, to: EntityID, pickup: Item[], drop?: Item[]): Promise<boolean>;
-
-  /**
-   * Make a bot use a crafter in order to craft an item.
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns true if the crafting succeeded, false otherwise.
-   */
-  craft(bot: EntityID, crafter: EntityID): Promise<boolean>;
-
-  /**
-   * get number of bits available
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns number of bits available
-   */
-  getBits(): number;
-
-  /**
-   * Get the price of the next bot
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns price of the next bot
-   */
-  getBotPrice(): number;
-
-  /**
-   * Purchase a new bot and place it at location [x, y]
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns true if the purchase succeeded, false otherwise.
-   */
-  purchaseBot(name: string, coord: [number, number]): boolean;
-
-  /**
-   * Upgrade the inventory of an entity
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns true if the upgrade succeeded, false otherwise.
-   */
-  upgradeMaxInventory(entity: EntityID): boolean;
-
-  /**
-   * Get the cost of upgrading the inventory of an entity
-   * @remarks
-   * RAM cost: 0 GB
-   * @returns cost of upgrading the inventory of an entity, -1 on failure.
-   */
-  getUpgradeMaxInventoryCost(entity: EntityID): number;
-
-  /**
-   * Completely reset the factory, for debug purposes
+   * Completely reset the myrian kernel, for debug purposes
    * @remarks
    * RAM cost: 0 GB
    */
   reset(): void;
+
+  /**
+   * Get device
+   * @remarks
+   * RAM cost: 0GB
+   * @returns device with this ID
+   */
+  getDevice(device: DeviceID): Device | undefined;
+
+  /**
+   * Get all devices
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns all devices
+   */
+  getDevices(): Device[];
+
+  /**
+   * get number of vulnerabilities available
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns number of vulnerabilities available
+   */
+  getVulns(): number;
+
+  /**
+   * Move a bus
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the move succeeded, false otherwise.
+   */
+  moveBus(bus: DeviceID, coord: [number, number]): Promise<boolean>;
+
+  /**
+   * Transfer components between devices, one of them must be a bus.
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the transfer succeeded, false otherwise.
+   */
+  transfer(from: DeviceID, to: DeviceID, input: Component[], output?: Component[]): Promise<boolean>;
+
+  /**
+   * Make a bus use a reducer in order to produce an component.
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the crafting succeeded, false otherwise.
+   */
+  reduce(bus: DeviceID, reducer: DeviceID): Promise<boolean>;
+
+  /**
+   * Get the cost of a device.
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of the next device of that type
+   */
+  getDeviceCost(type: DeviceType): number;
+
+  /**
+   * Make a bus install a new device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the installation succeeded, false otherwise.
+   */
+  installDevice(bus: DeviceID, name: string, coord: [number, number], deviceType: DeviceType): Promise<boolean>;
+
+  /**
+   * Make a bus uninstall a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the uninstallation succeeded, false otherwise.
+   */
+  uninstallDevice(bus: DeviceID, coord: [number, number]): Promise<boolean>;
+
+  /**
+   * Upgrade the max content of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeMaxContent(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the content of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the content of a device, -1 on failure.
+   */
+  getUpgradeMaxContentCost(device: DeviceID): number;
 }
 
 /** @public */
@@ -5513,10 +5583,10 @@ export interface NS {
   readonly stanek: Stanek;
 
   /**
-   * Namespace for factory functions. Contains spoilers.
+   * Namespace for myrian functions. Contains spoilers.
    * @remarks RAM cost: 0 GB
    */
-  readonly factory: Factory;
+  readonly myrian: Myrian;
 
   /**
    * Namespace for infiltration functions.

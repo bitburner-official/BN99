@@ -354,7 +354,7 @@ export function SidebarRoot(props: { page: Page }): React.ReactElement {
             canCorporation && { key_: Page.Corporation, icon: BusinessIcon },
             canGang && { key_: Page.Gang, icon: SportsMmaIcon },
             canIPvGO && { key_: Page.Go, icon: BorderInnerSharp },
-            { key_: Page.Factory, icon: SportsMmaIcon },
+            { key_: Page.MyrianOS, icon: DeveloperBoardIcon },
           ]}
         />
         <Divider />

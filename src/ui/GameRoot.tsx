@@ -72,7 +72,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { useRerender } from "./React/hooks";
 import { HistoryProvider } from "./React/Documentation";
 import { GoRoot } from "../Go/ui/GoRoot";
-import { FactoryRoot } from "../Factory/ui/FactoryRoot";
+import { MyrianRoot } from "../Myrian/ui/MyrianRoot";
 
 const htmlLocation = location;
 
@@ -116,7 +116,7 @@ export let Router: IRouter = {
 function determineStartPage() {
   if (RecoveryMode) return Page.Recovery;
   if (Player.currentWork !== null) return Page.Work;
-  return Page.Factory;
+  return Page.MyrianOS;
   return Page.Terminal;
 }
 
@@ -362,8 +362,8 @@ export function GameRoot(): React.ReactElement {
       mainPage = <GoRoot />;
       break;
     }
-    case Page.Factory: {
-      mainPage = <FactoryRoot />;
+    case Page.MyrianOS: {
+      mainPage = <MyrianRoot />;
       break;
     }
     case Page.Achievements: {

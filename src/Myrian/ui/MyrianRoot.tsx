@@ -2,9 +2,9 @@ import React from "react";
 import { Container, Typography } from "@mui/material";
 
 import { styled } from "@mui/system";
-import { factory, factorySize } from "../Helper";
+import { myrian, myrianSize } from "../Helper";
 import { useRerender } from "../../ui/React/hooks";
-import { EntityIcon, cellSize } from "./EntityIcon";
+import { DeviceIcon, cellSize } from "./DeviceIcon";
 
 const CellD = styled("div")({
   width: cellSize + "px",
@@ -17,8 +17,8 @@ const CellD = styled("div")({
 });
 
 const Cell = ({ x, y }: { x: number; y: number }): React.ReactElement => {
-  const entity = factory.entities.find((e) => e.x === x && e.y === y);
-  return <CellD>{entity && <EntityIcon entity={entity} />}</CellD>;
+  const device = myrian.devices.find((e) => e.x === x && e.y === y);
+  return <CellD>{device && <DeviceIcon device={device} />}</CellD>;
 };
 
 const RowD = styled("div")({
@@ -33,7 +33,7 @@ interface IColProps {
 const Col = ({ x }: IColProps): React.ReactElement => {
   return (
     <RowD>
-      {new Array(factorySize + 1).fill(null).map((_, y) => {
+      {new Array(myrianSize + 1).fill(null).map((_, y) => {
         if (y === 0)
           return (
             <CellD
@@ -62,7 +62,7 @@ const Table = styled("div")({
 const YHeader = () => {
   return (
     <RowD>
-      {new Array(factorySize + 1).fill(null).map((_, y) => {
+      {new Array(myrianSize + 1).fill(null).map((_, y) => {
         return (
           <CellD
             sx={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#00000000" }}
@@ -78,14 +78,17 @@ const YHeader = () => {
 
 interface IProps {}
 
-export const FactoryRoot = (__props: IProps): React.ReactElement => {
+export const MyrianRoot = (__props: IProps): React.ReactElement => {
   useRerender(200);
   return (
     <Container maxWidth="lg" disableGutters sx={{ mx: 0 }}>
-      <Typography variant="h4">Factory</Typography>
+      <Typography variant="h4">Myrian OS</Typography>
+      <Typography>
+        {myrian.vulns} vulns : {myrian.totalVulns} total vulns
+      </Typography>
       <div style={{ display: "flex" }}>
         <Table>
-          {new Array(factorySize + 1).fill(null).map((_, x) => {
+          {new Array(myrianSize + 1).fill(null).map((_, x) => {
             if (x === 0) return <YHeader key={x} />;
             return <Col key={x} x={x} />;
           })}

@@ -37,7 +37,7 @@ export enum SimplePage {
   Recovery = "Recovery",
   Achievements = "Achievements",
   ThemeBrowser = "Theme Browser",
-  Factory = "Factory",
+  MyrianOS = "Myrian OS",
 }
 
 export enum ComplexPage {
