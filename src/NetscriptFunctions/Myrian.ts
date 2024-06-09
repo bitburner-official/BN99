@@ -40,7 +40,9 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
     reset: () => resetMyrian,
     getDevice: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "id", _id);
-      return JSON.parse(JSON.stringify(findDevice(id)));
+      const device = findDevice(id);
+      if (!device) return;
+      return JSON.parse(JSON.stringify(device));
     },
     getDevices: (__ctx) => () => JSON.parse(JSON.stringify(myrian.devices)),
     getVulns: () => () => myrian.vulns,
@@ -70,14 +72,14 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        if (bus.busy) {
+        if (bus.isBusy) {
           helpers.log(ctx, () => `bus ${busID} is busy`);
           return Promise.resolve(false);
         }
 
-        bus.busy = true;
+        bus.isBusy = true;
         return helpers.netscriptDelay(ctx, moveSpeed(bus.moveLvl), true).then(() => {
-          bus.busy = false;
+          bus.isBusy = false;
           if (findDevice([x, y])) {
             helpers.log(ctx, () => `[${x}, ${y}] is occupied`);
             return Promise.resolve(false);
@@ -141,19 +143,19 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        if (fromDevice.busy || toDevice.busy) {
+        if (fromDevice.isBusy || toDevice.isBusy) {
           helpers.log(ctx, () => "one of the entities is busy");
           return Promise.resolve(false);
         }
 
         const bus = [fromDevice, toDevice].find((e) => e.type === DeviceType.Bus) as Bus;
         const container = [fromDevice, toDevice].find((e) => e.type !== DeviceType.Bus)!;
-        fromDevice.busy = true;
-        toDevice.busy = true;
+        fromDevice.isBusy = true;
+        toDevice.isBusy = true;
 
         return helpers.netscriptDelay(ctx, transferSpeed(bus.transferLvl), true).then(() => {
-          fromDevice.busy = false;
-          toDevice.busy = false;
+          fromDevice.isBusy = false;
+          toDevice.isBusy = false;
           toDevice.content = toDevice.content.filter((item) => !input.includes(item));
           toDevice.content.push(...output);
 
@@ -215,16 +217,16 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        if (bus.busy || reducer.busy) {
+        if (bus.isBusy || reducer.isBusy) {
           helpers.log(ctx, () => "bus or reducer is busy");
           return Promise.resolve(false);
         }
 
-        bus.busy = true;
-        reducer.busy = true;
+        bus.isBusy = true;
+        reducer.isBusy = true;
         return helpers.netscriptDelay(ctx, reduceSpeed(bus.reduceLvl), true).then(() => {
-          bus.busy = false;
-          reducer.busy = false;
+          bus.isBusy = false;
+          reducer.isBusy = false;
           reducer.content = [recipe.output];
           return Promise.resolve(true);
         });
@@ -298,7 +300,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return Promise.resolve(false);
       }
 
-      if (bus.busy) {
+      if (bus.isBusy) {
         helpers.log(ctx, () => `bus ${busID} is busy`);
         return Promise.resolve(false);
       }
@@ -321,12 +323,12 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return Promise.resolve(false);
       }
 
-      bus.busy = true;
+      bus.isBusy = true;
       const lockName = `lock-${busID}`;
       const lock = NewLock(lockName, x, y);
-      lock.busy = true;
+      lock.isBusy = true;
       return helpers.netscriptDelay(ctx, installSpeed(bus.installLvl), true).then(() => {
-        bus.busy = false;
+        bus.isBusy = false;
         removeDevice(lockName);
         switch (deviceType) {
           case DeviceType.Bus: {
@@ -368,16 +370,16 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return Promise.resolve(false);
       }
 
-      if (bus.busy || placedDevice.busy) {
+      if (bus.isBusy || placedDevice.isBusy) {
         helpers.log(ctx, () => `bus or device is busy`);
         return Promise.resolve(false);
       }
 
-      bus.busy = true;
-      placedDevice.busy = true;
+      bus.isBusy = true;
+      placedDevice.isBusy = true;
       return helpers.netscriptDelay(ctx, installSpeed(bus.installLvl), true).then(() => {
-        bus.busy = false;
-        placedDevice.busy = false;
+        bus.isBusy = false;
+        placedDevice.isBusy = false;
         removeDevice([x, y]);
         return Promise.resolve(true);
       });

@@ -5227,7 +5227,7 @@ export interface BaseDevice {
   type: DeviceType;
   x: number;
   y: number;
-  busy: boolean;
+  isBusy: boolean;
 }
 
 export interface Bus extends ContainerDevice {

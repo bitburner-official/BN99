@@ -16,7 +16,7 @@ export const NewBus = (name: string, x: number, y: number) => {
   myrian.devices.push({
     name,
     type: DeviceType.Bus,
-    busy: false,
+    isBusy: false,
     x,
     y,
     content: [],
@@ -34,7 +34,7 @@ export const NewCache = (name: string, x: number, y: number) => {
   myrian.devices.push({
     name,
     type: DeviceType.Cache,
-    busy: false,
+    isBusy: false,
     content: [],
     maxContent: 1,
     x,
@@ -46,7 +46,7 @@ export const NewReducer = (name: string, x: number, y: number) => {
   myrian.devices.push({
     name,
     type: DeviceType.Reducer,
-    busy: false,
+    isBusy: false,
     x,
     y,
     content: [],
@@ -59,7 +59,7 @@ export const NewISocket = (name: string, x: number, y: number, dispensing: Compo
   myrian.devices.push({
     name,
     type: DeviceType.ISocket,
-    busy: false,
+    isBusy: false,
     x,
     y,
     emitting: dispensing,
@@ -74,7 +74,7 @@ export const NewOSocket = (name: string, x: number, y: number) => {
   myrian.devices.push({
     name,
     type: DeviceType.OSocket,
-    busy: false,
+    isBusy: false,
     tier: 0,
     x,
     y,
@@ -88,7 +88,7 @@ export const NewLock = (name: string, x: number, y: number) => {
   const lock: Lock = {
     name,
     type: DeviceType.Lock,
-    busy: false,
+    isBusy: false,
     x,
     y,
   };
@@ -107,13 +107,13 @@ export const resetMyrian = () => {
   myrian.devices = [];
   Object.assign(myrian, defaultMyrian);
   NewBus("alice", Math.floor(myrianSize / 2), Math.floor(myrianSize / 2));
-  NewISocket("disp0", Math.floor(myrianSize / 4), 0, Component.R0);
-  NewISocket("disp1", Math.floor(myrianSize / 2), 0, Component.Y1);
-  NewISocket("disp2", Math.floor((myrianSize * 3) / 4), 0, Component.B0);
+  NewISocket("isocket0", Math.floor(myrianSize / 4), 0, Component.R0);
+  NewISocket("isocket1", Math.floor(myrianSize / 2), 0, Component.G0);
+  NewISocket("isocket2", Math.floor((myrianSize * 3) / 4), 0, Component.B0);
 
-  NewOSocket("dock0", Math.floor(myrianSize / 4), Math.floor(myrianSize - 1));
-  NewOSocket("dock1", Math.floor(myrianSize / 2), Math.floor(myrianSize - 1));
-  NewOSocket("dock2", Math.floor((myrianSize * 3) / 4), Math.floor(myrianSize - 1));
+  NewOSocket("osocket0", Math.floor(myrianSize / 4), Math.floor(myrianSize - 1));
+  NewOSocket("osocket1", Math.floor(myrianSize / 2), Math.floor(myrianSize - 1));
+  NewOSocket("osocket2", Math.floor((myrianSize * 3) / 4), Math.floor(myrianSize - 1));
 };
 
 resetMyrian();

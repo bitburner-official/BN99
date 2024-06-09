@@ -46,6 +46,12 @@ export const getNextISocketRequest = (tier: number) => {
     .map(() => potential[Math.floor(Math.random() * potential.length)]);
 };
 
+(() => {
+  for (let i = 0; i < 10; i++) {
+    console.log(getNextISocketRequest(0));
+  }
+})();
+
 export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
