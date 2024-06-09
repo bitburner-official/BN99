@@ -29,6 +29,7 @@ import {
   installSpeed,
   moveSpeed,
   reduceSpeed,
+  tierCost,
   transferSpeed,
   upgradeMaxContentCost,
 } from "../Myrian/formulas/formulas";
@@ -37,7 +38,7 @@ import { componentTiers } from "../Myrian/formulas/components";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
-    reset: () => resetMyrian,
+    DEUBG_RESET: () => resetMyrian,
     getDevice: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "id", _id);
       const device = findDevice(id);
@@ -407,6 +408,28 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           bus.isBusy = false;
           placedDevice.isBusy = false;
         });
+    },
+    upgradeTier: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("tier" in device)) return false;
+      const cost = tierCost(device.type, device.tier);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.tier++;
+      return true;
+    },
+    getUpgradeTierCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("tier" in device)) return -1;
+      return tierCost(device.type, device.tier);
+    },
+    DEBUG_GIVE_VULNS: (ctx) => (_amount) => {
+      const amount = helpers.number(ctx, "amount", _amount);
+      myrian.vulns += amount;
     },
   };
 }

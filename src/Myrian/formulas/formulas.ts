@@ -61,6 +61,8 @@ export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
 };
 
+export const tierCost = (type: DeviceType, tier: number) => exp(tierScale[type], tier);
+
 /**
 glitches:
 

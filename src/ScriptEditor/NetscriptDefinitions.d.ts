@@ -5282,11 +5282,16 @@ export type Device = Bus | ISocket | OSocket | Reducer | Cache | Lock;
 
 interface Myrian {
   /**
+   * Give yourself some vulns, for testing.
+   * @param n amount of vulns to give
+   */
+  DEBUG_GIVE_VULNS(n: number): void;
+  /**
    * Completely reset the myrian kernel, for debug purposes
    * @remarks
    * RAM cost: 0 GB
    */
-  reset(): void;
+  DEUBG_RESET(): void;
 
   /**
    * Get device
@@ -5375,6 +5380,22 @@ interface Myrian {
    * @returns cost of upgrading the content of a device, -1 on failure.
    */
   getUpgradeMaxContentCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the tier of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeTier(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the tier of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the tier of a device, -1 on failure.
+   */
+  getUpgradeTierCost(device: DeviceID): number;
 }
 
 /** @public */
