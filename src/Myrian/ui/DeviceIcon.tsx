@@ -7,6 +7,7 @@ import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import OutboxIcon from "@mui/icons-material/Outbox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MergeTypeIcon from "@mui/icons-material/MergeType";
+import BatteryChargingFullIcon from "@mui/icons-material/BatteryChargingFull";
 import BlockIcon from "@mui/icons-material/Block";
 import { Tooltip, Typography } from "@mui/material";
 import { isDeviceContainer } from "../Myrian";
@@ -110,6 +111,8 @@ const ReducerIcon = styled(MergeTypeIcon)(defaultIconStyle);
 
 const CacheIcon = styled(CheckBoxOutlineBlankIcon)(defaultIconStyle);
 
+const BatteryIcon = styled(BatteryChargingFullIcon)(defaultIconStyle);
+
 interface ITooltipContentProps {
   device: Device;
   content: React.ReactElement;
@@ -142,6 +145,24 @@ export const DeviceIcon = ({ device }: { device: Device }): React.ReactElement =
   switch (device.type) {
     case DeviceType.Lock: {
       return <LockIcon />;
+    }
+    case DeviceType.Battery: {
+      return (
+        <Tooltip
+          title={
+            <TooltipContent
+              device={device}
+              content={
+                <Typography>
+                  {device.energy} / {device.maxEnergy}
+                </Typography>
+              }
+            />
+          }
+        >
+          <BatteryIcon />
+        </Tooltip>
+      );
     }
     case DeviceType.Cache: {
       return (

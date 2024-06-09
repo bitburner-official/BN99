@@ -39,6 +39,10 @@ These devices act as storage for components.
 
 These devices cannot be installed. They appear after various conditions are fulfilled in order to block certain tiles.
 
+### Battery
+
+These devices are only relevant when the Magnetism glitch is active. It recharges the energy of a bus.
+
 ## Installing
 
 Bus can install new devices, when they do so a lock will appear over the tile that will eventually become the device. The cost of any device depends on the number of that type of device currently in the OS.
@@ -54,3 +58,28 @@ Currently 2 devices have tiers, reducers and OSockets.
 Upgrading a reducer allows it to reduce components of a higher tier and ONLY that higher tier. A tier 2 reducer can only tier 2 components like r1 + r1 => r2 and loses access to r0 + r0 => r1
 
 Upgrading a OSocket allows it to request higher tier components (as well as more components at a time).
+
+## Glitches
+
+glitches are optional difficulty modifiers that make the myrian more difficult BUT increase the amount of vulns gained.
+All glitches start at level 0 and must be activated when you chose. They also have a max level that differs from glitch to glitch.
+
+### Magnetism
+
+By default bus lose 0 energy when moving. But when this glitch is active they start losing energy, at 0 energy bus move much more slowly. Batteries must be installed and used to charge busses.
+
+### Friction
+
+When Friction is active busses move more slowly.
+
+### Isolation
+
+When Isolation is active busses transfer and charge more slowly.
+
+### Virtualization
+
+When Virtualization is active busses install and uninstall devices more slowly.
+
+### Jamming
+
+When Jamming is active busses use reducers more slowly.

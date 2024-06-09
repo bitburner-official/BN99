@@ -11,6 +11,7 @@ export const maxContentScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, 1, -1, 4095],
   [DeviceType.Cache]: [1.2, 10, 0, 63],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 // a^(b*X+c)+d
@@ -35,6 +36,7 @@ export const deviceScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [1.5, 1, 2, 0],
   [DeviceType.Cache]: [1.2, 10, 0, 63],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [1.2, 10, 0, 63],
 };
 
 export const deviceCost = (type: DeviceType, count?: number) =>
@@ -54,6 +56,7 @@ export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [1.5, 1, 2, 0],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [2, 1, 3, 0],
 };
 
 export const tierCost = (type: DeviceType, tier: number) => exp(tierScale[type], tier);
@@ -65,6 +68,7 @@ export const emissionScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 export const emissionCost = (type: DeviceType, emissionLvl: number) => exp(emissionScale[type], emissionLvl);
@@ -76,6 +80,7 @@ export const moveLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 export const moveLvlCost = (type: DeviceType, moveLvl: number) => exp(moveLvlScale[type], moveLvl);
@@ -87,6 +92,7 @@ export const transferLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 export const transferLvlCost = (type: DeviceType, transferLvl: number) => exp(transferLvlScale[type], transferLvl);
@@ -98,6 +104,7 @@ export const reduceLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 export const reduceLvlCost = (type: DeviceType, reduceLvl: number) => exp(reduceLvlScale[type], reduceLvl);
@@ -109,9 +116,22 @@ export const installLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [Infinity, Infinity, Infinity, Infinity],
 };
 
 export const installLvlCost = (type: DeviceType, installLvl: number) => exp(installLvlScale[type], installLvl);
+
+export const maxEnergyScale: Record<DeviceType, FactoryFormulaParams> = {
+  [DeviceType.Bus]: [2, 1, 3, 0],
+  [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Reducer]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],
+  [DeviceType.Battery]: [1.1, 1, 3, 8],
+};
+
+export const maxEnergyCost = (type: DeviceType, maxEnergy: number) => exp(maxEnergyScale[type], maxEnergy);
 
 /**
 glitches:
@@ -120,10 +140,11 @@ glitches:
 - moving dock & dispensers (higher level move faster, level 0 does not move)
 - dock complexity (higher level more complex, level 0 is repeating request)
 - energy consumption (higher level consume more, level 0 is no consumption)
-- ugrade degradation (higher level degrade faster, level 0 does not degrade)
+- ugrade degradation (hidden tile degrade upgrades, level 0 does not degrade)
 - move hinderance (speed) (higher level slower, level 0 is no hinderance)
 - connection hinderance (transfer / charge) (higher level slower, level 0 is immediate transfer speed and charge)
 - allocation hinderance (craft & build) (higher level slower, level 0 is no hinderance)
+
 
 special requests like "has red" that increases the reward
 */

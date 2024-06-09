@@ -1,7 +1,8 @@
-import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer } from "@nsdefs";
+import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery } from "@nsdefs";
 import { InternalAPI } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import {
+  NewBattery,
   NewBus,
   NewCache,
   NewISocket,
@@ -22,6 +23,7 @@ import {
   isDeviceContainer,
   isDeviceBus,
   removeDevice,
+  getTotalGlitchMult,
 } from "../Myrian/Myrian";
 import {
   deviceCost,
@@ -30,6 +32,7 @@ import {
   installLvlCost,
   installSpeed,
   isocketSpeed,
+  maxEnergyCost,
   moveLvlCost,
   moveSpeed,
   reduceLvlCost,
@@ -41,6 +44,15 @@ import {
 } from "../Myrian/formulas/formulas";
 import { recipes } from "../Myrian/formulas/recipes";
 import { componentTiers } from "../Myrian/formulas/components";
+import {
+  frictionMult,
+  glitchMaxLvl,
+  glitchMult,
+  isolationMult,
+  jammingMult,
+  magnetismLoss,
+  virtualizationMult,
+} from "../Myrian/formulas/glitches";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
@@ -88,11 +100,18 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
+        const outOfEnergy = bus.energy === 0 ? 0.5 : 1;
+
         bus.isBusy = true;
         return helpers
-          .netscriptDelay(ctx, moveSpeed(bus.moveLvl), true)
+          .netscriptDelay(
+            ctx,
+            moveSpeed(bus.moveLvl) * frictionMult(myrian.glitches[Glitch.Friction]) * outOfEnergy,
+            true,
+          )
           .then(() => {
             bus.isBusy = false;
+            bus.energy = Math.max(0, bus.energy - magnetismLoss(myrian.glitches[Glitch.Magnetism]));
             if (findDevice([x, y])) {
               helpers.log(ctx, () => `[${x}, ${y}] is occupied`);
               return Promise.resolve(false);
@@ -170,7 +189,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         toDevice.isBusy = true;
 
         return helpers
-          .netscriptDelay(ctx, transferSpeed(bus.transferLvl), true)
+          .netscriptDelay(ctx, transferSpeed(bus.transferLvl) * isolationMult(myrian.glitches[Glitch.Isolation]), true)
           .then(() => {
             toDevice.content = toDevice.content.filter((item) => !output.includes(item));
             toDevice.content.push(...input);
@@ -190,7 +209,8 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
               case DeviceType.OSocket: {
                 if (inventoryMatches(container.currentRequest, container.content)) {
-                  const gain = container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0);
+                  const gain =
+                    container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0) * getTotalGlitchMult();
                   myrian.vulns += gain;
                   myrian.totalVulns += gain;
                   container.content = [];
@@ -246,7 +266,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         bus.isBusy = true;
         reducer.isBusy = true;
         return helpers
-          .netscriptDelay(ctx, reduceSpeed(bus.reduceLvl), true)
+          .netscriptDelay(ctx, reduceSpeed(bus.reduceLvl) * jammingMult(myrian.glitches[Glitch.Jamming]), true)
           .then(() => {
             reducer.content = [recipe.output];
             return Promise.resolve(true);
@@ -256,6 +276,38 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             reducer.isBusy = false;
           });
       },
+    energize: (ctx) => async (_bus, _battery) => {
+      const busID = helpers.deviceID(ctx, "bus", _bus);
+      const batteryID = helpers.deviceID(ctx, "battery", _battery);
+
+      const bus = findDevice(busID, DeviceType.Bus) as Bus;
+      if (!bus) {
+        helpers.log(ctx, () => `bus ${busID} not found`);
+        return Promise.resolve(-1);
+      }
+
+      const battery = findDevice(batteryID, DeviceType.Battery) as Battery;
+      if (!battery) {
+        helpers.log(ctx, () => `battery ${batteryID} not found`);
+        return Promise.resolve(-1);
+      }
+
+      const transfer = Math.min(battery.energy, bus.maxEnergy - bus.energy);
+      bus.isBusy = true;
+      battery.isBusy = true;
+
+      return helpers
+        .netscriptDelay(ctx, 100 * transfer, true)
+        .then(() => {
+          bus.energy += transfer;
+          battery.energy -= transfer;
+          return Promise.resolve(transfer);
+        })
+        .finally(() => {
+          bus.isBusy = false;
+          battery.isBusy = false;
+        });
+    },
     upgradeMaxContent: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "id", _id);
       const container = findDevice(id);
@@ -353,7 +405,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const lock = NewLock(lockName, x, y);
       lock.isBusy = true;
       return helpers
-        .netscriptDelay(ctx, installSpeed(bus.installLvl), true)
+        .netscriptDelay(
+          ctx,
+          installSpeed(bus.installLvl) * virtualizationMult(myrian.glitches[Glitch.Virtualization]),
+          true,
+        )
         .then(() => {
           bus.isBusy = false;
           removeDevice(lockName);
@@ -376,6 +432,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             }
             case DeviceType.Cache: {
               NewCache(name, x, y);
+              break;
+            }
+            case DeviceType.Battery: {
+              NewBattery(name, x, y);
+              break;
             }
           }
           return Promise.resolve(true);
@@ -408,7 +469,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       bus.isBusy = true;
       placedDevice.isBusy = true;
       return helpers
-        .netscriptDelay(ctx, installSpeed(bus.installLvl), true)
+        .netscriptDelay(
+          ctx,
+          installSpeed(bus.installLvl) * virtualizationMult(myrian.glitches[Glitch.Virtualization]),
+          true,
+        )
         .then(() => {
           bus.isBusy = false;
           placedDevice.isBusy = false;
@@ -528,5 +593,45 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       device.installLvl++;
       return true;
     },
+    getUpgradeMaxEnergyCost: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return -1;
+      if (!("maxEnergy" in device)) return -1;
+      return maxEnergyCost(device.type, device.maxEnergy);
+    },
+    upgradeMaxEnergy: (ctx) => (_id) => {
+      const id = helpers.deviceID(ctx, "device", _id);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (!("maxEnergy" in device)) return false;
+      const cost = maxEnergyCost(device.type, device.maxEnergy);
+      if (myrian.vulns < cost) return false;
+      myrian.vulns -= cost;
+      device.maxEnergy++;
+      return true;
+    },
+    setGlitchLvl: (ctx) => async (_glitch, _lvl) => {
+      const glitch = helpers.string(ctx, "glitch", _glitch);
+      const lvl = helpers.number(ctx, "lvl", _lvl);
+      if (lvl < 0 || lvl > glitchMaxLvl[glitch as Glitch]) return Promise.resolve();
+      const currentLvl = myrian.glitches[glitch as Glitch];
+      return helpers.netscriptDelay(ctx, Math.abs(lvl - currentLvl) * 5000, true).then(() => {
+        myrian.glitches[glitch as Glitch] = lvl;
+      });
+    },
+    getGlitchLvl: (ctx) => (_glitch) => {
+      const glitch = helpers.string(ctx, "glitch", _glitch) as Glitch;
+      return myrian.glitches[glitch];
+    },
+    getGlitchMaxLvl: (ctx) => (_glitch) => {
+      const glitch = helpers.string(ctx, "glitch", _glitch) as Glitch;
+      return glitchMaxLvl[glitch];
+    },
+    getGlitchMult: (ctx) => (_glitch) => {
+      const glitch = helpers.string(ctx, "glitch", _glitch) as Glitch;
+      return glitchMult(glitch, myrian.glitches[glitch]);
+    },
+    getTotalGlitchMult: () => () => getTotalGlitchMult(),
   };
 }

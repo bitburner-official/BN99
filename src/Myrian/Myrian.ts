@@ -11,13 +11,17 @@ import {
   Lock,
   BaseDevice,
   DeviceID,
+  Glitch,
+  Battery,
 } from "@nsdefs";
 import { myrian, myrianSize } from "./Helper";
+import { glitchMult } from "./formulas/glitches";
 
 export interface Myrian {
   vulns: number;
   totalVulns: number;
   devices: Device[];
+  glitches: Record<Glitch, number>;
 }
 
 export const distance = (a: Device, b: Device) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -112,6 +116,7 @@ export const isDeviceOSocket = (d: Device): d is OSocket => d.type === DeviceTyp
 export const isDeviceReducer = (d: Device): d is Reducer => d.type === DeviceType.Reducer;
 export const isDeviceCache = (d: Device): d is Cache => d.type === DeviceType.Cache;
 export const isDeviceLock = (d: Device): d is Lock => d.type === DeviceType.Lock;
+export const isDeviceBattery = (d: Device): d is Battery => d.type === DeviceType.Battery;
 
 export const findDevice = (id: DeviceID, type?: DeviceType): Device | undefined =>
   myrian.devices.find(
@@ -123,3 +128,8 @@ export const removeDevice = (id: DeviceID, type?: DeviceType) => {
     (e) => !((typeof id === "string" ? e.name === id : e.x === id[0] && e.y === id[1]) && (!type || type === e.type)),
   );
 };
+
+export const getTotalGlitchMult = () =>
+  Object.entries(myrian.glitches).reduce((acc, [glitch, lvl]) => {
+    return acc * glitchMult(glitch as Glitch, lvl);
+  }, 1);

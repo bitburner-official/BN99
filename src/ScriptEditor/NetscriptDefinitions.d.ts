@@ -5150,6 +5150,7 @@ export enum DeviceType {
   Reducer = "reducer",
   Cache = "cache",
   Lock = "lock",
+  Battery = "battery",
 }
 
 export enum Component {
@@ -5222,6 +5223,27 @@ export enum Component {
   W7 = "w7",
 }
 
+export enum Glitch {
+  // Locks spawn at random
+  Segmentation = "segmentation",
+  // ISockets and OSockets move around on their own
+  Roaming = "roaming",
+  // OSocket ask for more complicated components
+  Encryption = "encryption",
+  // Energy starts being consumed (level 0 is no consumption)
+  Magnetism = "magnetism",
+  // Hidden tiles on the board, when stepped on the bus loses upgrades
+  Rust = "rust",
+  // Move slows down
+  Friction = "friction",
+  // Transfer components and charging slows down
+  Isolation = "isolation",
+  // Install/Uninstall slows down
+  Virtualization = "virtualization",
+  // Reduce slows down
+  Jamming = "jamming",
+}
+
 export interface BaseDevice {
   name: string;
   type: DeviceType;
@@ -5230,14 +5252,21 @@ export interface BaseDevice {
   isBusy: boolean;
 }
 
-export interface Bus extends ContainerDevice {
+export interface Bus extends ContainerDevice, EnergyDevice {
   type: DeviceType.Bus;
   moveLvl: number;
   transferLvl: number;
   reduceLvl: number;
   installLvl: number;
-  // energy: number;
-  // maxEnergy: number;
+}
+
+export interface EnergyDevice extends BaseDevice {
+  energy: number;
+  maxEnergy: number;
+}
+
+export interface TieredDevice extends BaseDevice {
+  tier: number;
 }
 
 export interface ContainerDevice extends BaseDevice {
@@ -5252,9 +5281,8 @@ export interface ISocket extends ContainerDevice {
   cooldownUntil: number;
 }
 
-export interface OSocket extends ContainerDevice {
+export interface OSocket extends ContainerDevice, TieredDevice {
   type: DeviceType.OSocket;
-  tier: number;
   currentRequest: Component[];
 }
 
@@ -5262,13 +5290,16 @@ export interface Cache extends ContainerDevice {
   type: DeviceType.Cache;
 }
 
-export interface Reducer extends ContainerDevice {
+export interface Reducer extends ContainerDevice, TieredDevice {
   type: DeviceType.Reducer;
-  tier: number;
 }
 
 export interface Lock extends BaseDevice {
   type: DeviceType.Lock;
+}
+
+export interface Battery extends EnergyDevice, TieredDevice {
+  type: DeviceType.Battery;
 }
 
 export interface Recipe {
@@ -5278,7 +5309,7 @@ export interface Recipe {
 
 export type DeviceID = string | [number, number];
 
-export type Device = Bus | ISocket | OSocket | Reducer | Cache | Lock;
+export type Device = Bus | ISocket | OSocket | Reducer | Cache | Lock | Battery;
 
 interface Myrian {
   /**
@@ -5340,6 +5371,12 @@ interface Myrian {
    * @returns true if the crafting succeeded, false otherwise.
    */
   reduce(bus: DeviceID, reducer: DeviceID): Promise<boolean>;
+
+  /**
+   * Charge a bus with a battery, restoring it's energy.
+   * @returns positive number for the amount of energy transfered, -1 on failure.
+   */
+  energize(bus: DeviceID, battery: DeviceID): Promise<number>;
 
   /**
    * Get the cost of a device.
@@ -5476,6 +5513,56 @@ interface Myrian {
    * @returns true if the upgrade succeeded, false otherwise.
    */
   upgradeInstallLvl(device: DeviceID): boolean;
+
+  /**
+   * Get the cost of upgrading the maxEnergy of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns cost of upgrading the maxEnergy of a device, -1 on failure.
+   */
+  getUpgradeMaxEnergyCost(device: DeviceID): number;
+
+  /**
+   * Upgrade the maxEnergy of a device
+   * @remarks
+   * RAM cost: 0 GB
+   * @returns true if the upgrade succeeded, false otherwise.
+   */
+  upgradeMaxEnergy(device: DeviceID): boolean;
+
+  /**
+   * Set the lvl of a glitch
+   * @param glitch name of the glitch
+   * @param lvl new lvl of the glitch
+   */
+  setGlitchLvl(glitch: Glitch, lvl: number): Promise<void>;
+
+  /**
+   * Get the lvl of a glitch
+   * @param glitch name of the glitch
+   * @returns current lvl of the glitch
+   */
+  getGlitchLvl(glitch: Glitch): number;
+
+  /**
+   * Get the max lvl of a glitch
+   * @param glitch name of the glitch
+   * @returns max lvl of the glitch
+   */
+  getGlitchMaxLvl(glitch: Glitch): number;
+
+  /**
+   * Get the vulns multiplier for a glitch
+   * @param glitch name of the glitch
+   * @returns multiplier for the glitch
+   */
+  getGlitchMult(glitch: Glitch): number;
+
+  /**
+   * Get the total vulns multiplier for all glitches
+   * @returns total vulns multiplier
+   */
+  getTotalGlitchMult(): number;
 }
 
 /** @public */
