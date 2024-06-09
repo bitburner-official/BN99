@@ -77,13 +77,13 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
         bus.busy = true;
         return helpers.netscriptDelay(ctx, moveSpeed(bus.moveLvl), true).then(() => {
+          bus.busy = false;
           if (findDevice([x, y])) {
             helpers.log(ctx, () => `[${x}, ${y}] is occupied`);
             return Promise.resolve(false);
           }
           bus.x = x;
           bus.y = y;
-          bus.busy = false;
           return Promise.resolve(true);
         });
       },
