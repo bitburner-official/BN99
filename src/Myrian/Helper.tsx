@@ -92,7 +92,6 @@ export const NewOSocket = (name: string, x: number, y: number) => {
     name,
     type: DeviceType.OSocket,
     isBusy: false,
-    tier: 0,
     x,
     y,
     currentRequest: getNextISocketRequest(0),

@@ -52,7 +52,7 @@ export const getNextISocketRequest = (tier: number) => {
 export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
-  [DeviceType.OSocket]: [2, 1, 3, 0],
+  [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Reducer]: [1.5, 1, 2, 0],
   [DeviceType.Cache]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.Lock]: [Infinity, Infinity, Infinity, Infinity],

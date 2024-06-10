@@ -5281,7 +5281,7 @@ export interface ISocket extends ContainerDevice {
   cooldownUntil: number;
 }
 
-export interface OSocket extends ContainerDevice, TieredDevice {
+export interface OSocket extends ContainerDevice {
   type: DeviceType.OSocket;
   currentRequest: Component[];
 }

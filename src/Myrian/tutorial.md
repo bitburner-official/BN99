@@ -91,3 +91,11 @@ When Virtualization is active busses install and uninstall devices more slowly.
 ### Jamming
 
 When Jamming is active busses use reducers more slowly.
+
+## Roaming
+
+When Roaming is active, isockets and osockets start to move around the map
+
+## Encryption
+
+Encryption is the only glitch that's always active. The level of Encryption determines the complexity of the requests made by osockets.

@@ -216,7 +216,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
                   myrian.vulns += gain;
                   myrian.totalVulns += gain;
                   container.content = [];
-                  const request = getNextISocketRequest(container.tier);
+                  const request = getNextISocketRequest(myrian.glitches[Glitch.Encryption]);
                   container.currentRequest = request;
                   container.maxContent = request.length;
                 }
