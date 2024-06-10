@@ -40,3 +40,5 @@ export const jammingMult = (lvl: number) => Math.pow(1.3, lvl);
 
 // energy loss
 export const magnetismLoss = (lvl: number) => lvl;
+
+export const roamingTime = (lvl: number) => 30000 * Math.pow(0.7, lvl);

@@ -79,7 +79,7 @@ const YHeader = () => {
 interface IProps {}
 
 export const MyrianRoot = (__props: IProps): React.ReactElement => {
-  useRerender(200);
+  useRerender(50);
   return (
     <Container maxWidth="lg" disableGutters sx={{ mx: 0 }}>
       <Typography variant="h4">Myrian OS</Typography>
