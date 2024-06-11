@@ -1,10 +1,14 @@
 import React from "react";
-import { Container, Typography } from "@mui/material";
+import { Container, IconButton, Typography } from "@mui/material";
 
 import { styled } from "@mui/system";
 import { myrian, myrianSize } from "../Helper";
 import { useRerender } from "../../ui/React/hooks";
 import { DeviceIcon, cellSize } from "./DeviceIcon";
+import { Info } from "@mui/icons-material";
+import { dialogBoxCreate } from "../../ui/React/DialogBox";
+import { MD } from "../../ui/MD/MD";
+import { tutorial } from "./tutorial";
 
 const CellD = styled("div")({
   width: cellSize + "px",
@@ -80,9 +84,18 @@ interface IProps {}
 
 export const MyrianRoot = (__props: IProps): React.ReactElement => {
   useRerender(50);
+
+  const onHelp = () => {
+    dialogBoxCreate(<MD md={tutorial} />);
+  };
   return (
     <Container maxWidth="lg" disableGutters sx={{ mx: 0 }}>
-      <Typography variant="h4">Myrian OS</Typography>
+      <Typography variant="h4">
+        Myrian OS
+        <IconButton onClick={onHelp}>
+          <Info />
+        </IconButton>
+      </Typography>
       <Typography>
         {myrian.vulns} vulns : {myrian.totalVulns} total vulns
       </Typography>

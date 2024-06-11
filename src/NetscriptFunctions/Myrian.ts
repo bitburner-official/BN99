@@ -193,6 +193,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return helpers
           .netscriptDelay(ctx, transferSpeed(bus.transferLvl) * isolationMult(myrian.glitches[Glitch.Isolation]), true)
           .then(() => {
+            const previousSize = container.content.length;
             toDevice.content = toDevice.content.filter((item) => !output.includes(item));
             toDevice.content.push(...input);
 
@@ -201,6 +202,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
             switch (container.type) {
               case DeviceType.ISocket: {
+                if (previousSize <= container.content.length) break;
                 const cooldown = isocketSpeed(container.emissionLvl);
                 container.cooldownUntil = Date.now() + cooldown;
                 setTimeout(() => {
@@ -210,16 +212,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
               }
 
               case DeviceType.OSocket: {
-                if (inventoryMatches(container.currentRequest, container.content)) {
-                  const gain =
-                    container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0) * getTotalGlitchMult();
-                  myrian.vulns += gain;
-                  myrian.totalVulns += gain;
-                  container.content = [];
-                  const request = getNextISocketRequest(myrian.glitches[Glitch.Encryption]);
-                  container.currentRequest = request;
-                  container.maxContent = request.length;
-                }
+                if (!inventoryMatches(container.currentRequest, container.content)) break;
+                const gain =
+                  container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0) * getTotalGlitchMult();
+                myrian.vulns += gain;
+                myrian.totalVulns += gain;
+                container.content = [];
+                const request = getNextISocketRequest(myrian.glitches[Glitch.Encryption]);
+                container.currentRequest = request;
+                container.maxContent = request.length;
                 break;
               }
             }

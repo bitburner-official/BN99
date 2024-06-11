@@ -313,7 +313,7 @@ export function prestigeSourceFile(isFlume: boolean): void {
     updateHashManagerCapacity();
   }
 
-  if (Player.bitNodeN === 13) {
+  if (Player.bitNodeN === 13 || Player.bitNodeN === 19) {
     Player.money = CONSTANTS.TravelCost;
   }
   staneksGift.prestigeSourceFile();
