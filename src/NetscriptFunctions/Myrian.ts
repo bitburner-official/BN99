@@ -1,4 +1,4 @@
-import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery } from "@nsdefs";
+import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery, ISocket } from "@nsdefs";
 import { InternalAPI } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import {
@@ -279,6 +279,56 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             reducer.isBusy = false;
           });
       },
+    tweakISocket: (ctx) => async (_bus, _isocket, _component) => {
+      const busID = helpers.deviceID(ctx, "bus", _bus);
+      const isocketID = helpers.deviceID(ctx, "isocket", _isocket);
+      const component = helpers.string(ctx, "component", _component) as Component;
+
+      if (!componentTiers[0].includes(component)) {
+        helpers.log(ctx, () => `component ${component} is not a valid component`);
+        return Promise.resolve(false);
+      }
+
+      const bus = findDevice(busID, DeviceType.Bus) as Bus;
+      if (!bus) {
+        helpers.log(ctx, () => `bus ${busID} not found`);
+        return Promise.resolve(false);
+      }
+      const isocket = findDevice(isocketID, DeviceType.ISocket) as ISocket;
+      if (!isocket) {
+        helpers.log(ctx, () => `isocket ${isocketID} not found`);
+        return Promise.resolve(false);
+      }
+
+      if (!adjacent(bus, isocket)) {
+        helpers.log(ctx, () => "bus and isocket are not adjacent");
+        return Promise.resolve(false);
+      }
+
+      bus.isBusy = true;
+      isocket.isBusy = true;
+
+      return helpers
+        .netscriptDelay(
+          ctx,
+          installSpeed(bus.installLvl) * virtualizationMult(myrian.glitches[Glitch.Virtualization]),
+          true,
+        )
+        .then(() => {
+          isocket.emitting = component;
+          isocket.content = [];
+          const cooldown = isocketSpeed(isocket.emissionLvl);
+          isocket.cooldownUntil = Date.now() + cooldown;
+          setTimeout(() => {
+            isocket.content = new Array(isocket.maxContent).fill(isocket.emitting);
+          }, cooldown);
+          return Promise.resolve(true);
+        })
+        .finally(() => {
+          bus.isBusy = false;
+          isocket.isBusy = false;
+        });
+    },
     energize: (ctx) => async (_bus, _battery) => {
       const busID = helpers.deviceID(ctx, "bus", _bus);
       const batteryID = helpers.deviceID(ctx, "battery", _battery);

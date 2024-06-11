@@ -5373,6 +5373,13 @@ interface Myrian {
   reduce(bus: DeviceID, reducer: DeviceID): Promise<boolean>;
 
   /**
+   * Change the component that an isocket emits.
+   * @param component tier 0 component that the isocket should emit
+   * @returns true if the tweak succeeded, false otherwise.
+   */
+  tweakISocket(bus: DeviceID, isocket: DeviceID, component: Component): Promise<boolean>;
+
+  /**
    * Charge a bus with a battery, restoring it's energy.
    * @returns positive number for the amount of energy transfered, -1 on failure.
    */
