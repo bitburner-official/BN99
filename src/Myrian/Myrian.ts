@@ -1,6 +1,6 @@
 import { Device, DeviceType, Component, DeviceID, Glitch } from "@nsdefs";
 import { glitchMult } from "./formulas/glitches";
-import { pickOne } from "./utils";
+import { isDeviceISocket, pickOne } from "./utils";
 import { componentTiers } from "./formulas/components";
 import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "./NewDevices";
 import { startRoaming } from "./glitches/roaming";
@@ -33,8 +33,10 @@ export const loadMyrian = (save: string) => {
   startRust();
   startSegmentation();
   if (!save) return;
-  //   const savedMyrian = JSON.parse(save);
-  //   Object.assign(myrian, savedMyrian);
+  const savedMyrian = JSON.parse(save);
+  Object.assign(myrian, savedMyrian);
+  myrian.devices.forEach((d) => (d.isBusy = false));
+  myrian.devices.filter(isDeviceISocket).forEach((d) => (d.content = new Array(d.maxContent).fill(d.emitting)));
 };
 
 export const inMyrianBounds = (x: number, y: number) => x >= 0 && x < myrianSize && y >= 0 && y < myrianSize;

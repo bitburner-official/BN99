@@ -355,7 +355,7 @@ export function SidebarRoot(props: { page: Page }): React.ReactElement {
             canCorporation && { key_: Page.Corporation, icon: BusinessIcon },
             canGang && { key_: Page.Gang, icon: SportsMmaIcon },
             canIPvGO && { key_: Page.Go, icon: BorderInnerSharp },
-            (true || Player.myrianConnection) && { key_: Page.MyrianOS, icon: SettingsInputComponentIcon },
+            Player.myrianConnection && { key_: Page.MyrianOS, icon: SettingsInputComponentIcon },
           ]}
         />
         <Divider />
