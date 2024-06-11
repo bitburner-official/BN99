@@ -45,7 +45,7 @@ import { downloadContentAsFile } from "./utils/FileUtils";
 import { showAPIBreaks } from "./utils/APIBreaks/APIBreak";
 import { breakInfos261 } from "./utils/APIBreaks/2.6.1";
 import { handleGetSaveDataError } from "./Netscript/ErrorMessages";
-import { myrian, loadMyrian } from "./Myrian/Helper";
+import { myrian, loadMyrian } from "./Myrian/Myrian";
 
 /* SaveObject.js
  *  Defines the object used to save/load games

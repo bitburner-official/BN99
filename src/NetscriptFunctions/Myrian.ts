@@ -2,42 +2,27 @@ import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery
 import { InternalAPI } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import {
-  NewBattery,
-  NewBus,
-  NewCache,
-  NewISocket,
-  NewLock,
-  NewOSocket,
-  NewReducer,
-  myrian as myrian,
-  myrianSize,
-  resetMyrian,
-} from "../Myrian/Helper";
-import {
-  adjacent,
-  adjacentCoord2D,
-  vulnsMap,
   findDevice,
   inMyrianBounds,
-  inventoryMatches,
-  isDeviceContainer,
-  isDeviceBus,
   removeDevice,
   getTotalGlitchMult,
-  rustBus,
+  getNextOSocketRequest,
+  countDevices,
+  resetMyrian,
+  myrian,
+  myrianSize,
 } from "../Myrian/Myrian";
 import {
-  deviceCost,
-  emissionCost,
-  getNextISocketRequest,
-  installLvlCost,
-  maxEnergyCost,
-  moveLvlCost,
-  reduceLvlCost,
-  tierCost,
-  transferLvlCost,
+  installDeviceCost,
+  upgradeEmissionCost,
+  upgradeInstallLvlCost,
+  upgradeMaxEnergyCost,
+  upgradeMoveLvlCost,
+  upgradeReduceLvlCost,
+  upgradeTierCost,
+  upgradeTransferLvlCost,
   upgradeMaxContentCost,
-} from "../Myrian/formulas/formulas";
+} from "../Myrian/formulas/costs";
 import { recipes } from "../Myrian/formulas/recipes";
 import { componentTiers } from "../Myrian/formulas/components";
 import {
@@ -49,8 +34,25 @@ import {
   magnetismLoss,
   virtualizationMult,
 } from "../Myrian/formulas/glitches";
-import { pickOne } from "../Myrian/utils";
-import { installSpeed, isocketSpeed, moveSpeed, reduceSpeed, transferSpeed } from "../Myrian/formulas/speed";
+import {
+  adjacent,
+  adjacentCoord2D,
+  contentVulnsValue,
+  inventoryMatches,
+  isDeviceBus,
+  isDeviceContainer,
+  isDeviceTiered,
+  isEmittingDevice,
+  isEnergyDevice,
+  isInstallingDevice,
+  isMovingDevice,
+  isReducingDevice,
+  isTransferingDevice,
+  pickOne,
+} from "../Myrian/utils";
+import { installSpeed, emissionSpeed, moveSpeed, reduceSpeed, transferSpeed } from "../Myrian/formulas/speed";
+import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "../Myrian/NewDevices";
+import { rustBus } from "../Myrian/glitches/rust";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
@@ -209,7 +211,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             switch (container.type) {
               case DeviceType.ISocket: {
                 if (previousSize <= container.content.length) break;
-                const cooldown = isocketSpeed(container.emissionLvl);
+                const cooldown = emissionSpeed(container.emissionLvl);
                 container.cooldownUntil = Date.now() + cooldown;
                 setTimeout(() => {
                   container.content = new Array(container.maxContent).fill(container.emitting);
@@ -219,12 +221,11 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
               case DeviceType.OSocket: {
                 if (!inventoryMatches(container.currentRequest, container.content)) break;
-                const gain =
-                  container.content.map((i) => vulnsMap[i]).reduce((a, b) => a + b, 0) * getTotalGlitchMult();
+                const gain = contentVulnsValue(container.content) * getTotalGlitchMult();
                 myrian.vulns += gain;
                 myrian.totalVulns += gain;
                 container.content = [];
-                const request = getNextISocketRequest(myrian.glitches[Glitch.Encryption]);
+                const request = getNextOSocketRequest(myrian.glitches[Glitch.Encryption]);
                 container.currentRequest = request;
                 container.maxContent = request.length;
                 break;
@@ -323,7 +324,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         .then(() => {
           isocket.emitting = component;
           isocket.content = [];
-          const cooldown = isocketSpeed(isocket.emissionLvl);
+          const cooldown = emissionSpeed(isocket.emissionLvl);
           isocket.cooldownUntil = Date.now() + cooldown;
           setTimeout(() => {
             isocket.content = new Array(isocket.maxContent).fill(isocket.emitting);
@@ -410,7 +411,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
 
     getDeviceCost: (ctx) => (_type) => {
       const type = helpers.string(ctx, "type", _type);
-      return deviceCost(type as DeviceType);
+      return installDeviceCost(type as DeviceType, countDevices(type as DeviceType));
     },
 
     installDevice: (ctx) => async (_bus, _name, _coord, _deviceType) => {
@@ -441,7 +442,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
         return Promise.resolve(false);
       }
 
-      const cost = deviceCost(deviceType);
+      const cost = installDeviceCost(deviceType, countDevices(deviceType));
       if (myrian.vulns < cost) {
         helpers.log(ctx, () => `not enough vulns to install device`);
         return Promise.resolve(false);
@@ -548,15 +549,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("tier" in device)) return -1;
-      return tierCost(device.type, device.tier);
+      if (!isDeviceTiered(device)) return -1;
+      return upgradeTierCost(device.type, device.tier);
     },
     upgradeTier: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("tier" in device)) return false;
-      const cost = tierCost(device.type, device.tier);
+      if (!isDeviceTiered(device)) return false;
+      const cost = upgradeTierCost(device.type, device.tier);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.tier++;
@@ -566,15 +567,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("emissionLvl" in device)) return -1;
-      return emissionCost(device.type, device.emissionLvl);
+      if (!isEmittingDevice(device)) return -1;
+      return upgradeEmissionCost(device.type, device.emissionLvl);
     },
     upgradeEmissionLvl: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("emissionLvl" in device)) return false;
-      const cost = emissionCost(device.type, device.emissionLvl);
+      if (!isEmittingDevice(device)) return false;
+      const cost = upgradeEmissionCost(device.type, device.emissionLvl);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.emissionLvl++;
@@ -584,15 +585,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("moveLvl" in device)) return -1;
-      return moveLvlCost(device.type, device.moveLvl);
+      if (!isMovingDevice(device)) return -1;
+      return upgradeMoveLvlCost(device.type, device.moveLvl);
     },
     upgradeMoveLvl: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("moveLvl" in device)) return false;
-      const cost = moveLvlCost(device.type, device.moveLvl);
+      if (!isMovingDevice(device)) return false;
+      const cost = upgradeMoveLvlCost(device.type, device.moveLvl);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.moveLvl++;
@@ -602,15 +603,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("transferLvl" in device)) return -1;
-      return transferLvlCost(device.type, device.transferLvl);
+      if (!isTransferingDevice(device)) return -1;
+      return upgradeTransferLvlCost(device.type, device.transferLvl);
     },
     upgradeTransferLvl: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("transferLvl" in device)) return false;
-      const cost = transferLvlCost(device.type, device.transferLvl);
+      if (!isTransferingDevice(device)) return false;
+      const cost = upgradeTransferLvlCost(device.type, device.transferLvl);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.transferLvl++;
@@ -620,15 +621,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("reduceLvl" in device)) return -1;
-      return reduceLvlCost(device.type, device.reduceLvl);
+      if (!isReducingDevice(device)) return -1;
+      return upgradeReduceLvlCost(device.type, device.reduceLvl);
     },
     upgradeReduceLvl: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("reduceLvl" in device)) return false;
-      const cost = reduceLvlCost(device.type, device.reduceLvl);
+      if (!isReducingDevice(device)) return false;
+      const cost = upgradeReduceLvlCost(device.type, device.reduceLvl);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.reduceLvl++;
@@ -638,15 +639,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("installLvl" in device)) return -1;
-      return installLvlCost(device.type, device.installLvl);
+      if (!isInstallingDevice(device)) return -1;
+      return upgradeInstallLvlCost(device.type, device.installLvl);
     },
     upgradeInstallLvl: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("installLvl" in device)) return false;
-      const cost = installLvlCost(device.type, device.installLvl);
+      if (!isInstallingDevice(device)) return false;
+      const cost = upgradeInstallLvlCost(device.type, device.installLvl);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.installLvl++;
@@ -656,15 +657,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return -1;
-      if (!("maxEnergy" in device)) return -1;
-      return maxEnergyCost(device.type, device.maxEnergy);
+      if (!isEnergyDevice(device)) return -1;
+      return upgradeMaxEnergyCost(device.type, device.maxEnergy);
     },
     upgradeMaxEnergy: (ctx) => (_id) => {
       const id = helpers.deviceID(ctx, "device", _id);
       const device = findDevice(id);
       if (!device) return false;
-      if (!("maxEnergy" in device)) return false;
-      const cost = maxEnergyCost(device.type, device.maxEnergy);
+      if (!isEnergyDevice(device)) return false;
+      const cost = upgradeMaxEnergyCost(device.type, device.maxEnergy);
       if (myrian.vulns < cost) return false;
       myrian.vulns -= cost;
       device.maxEnergy++;

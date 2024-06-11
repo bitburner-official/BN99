@@ -1,22 +1,11 @@
-import {
-  Bus,
-  Device,
-  DeviceType,
-  ContainerDevice,
-  Component,
-  ISocket,
-  OSocket,
-  Reducer,
-  Cache,
-  Lock,
-  BaseDevice,
-  DeviceID,
-  Glitch,
-  Battery,
-} from "@nsdefs";
-import { myrian, myrianSize } from "./Helper";
+import { Device, DeviceType, Component, DeviceID, Glitch } from "@nsdefs";
 import { glitchMult } from "./formulas/glitches";
 import { pickOne } from "./utils";
+import { componentTiers } from "./formulas/components";
+import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "./NewDevices";
+import { startRoaming } from "./glitches/roaming";
+import { startRust } from "./glitches/rust";
+import { startSegmentation } from "./glitches/segmentation";
 
 export interface Myrian {
   vulns: number;
@@ -26,99 +15,29 @@ export interface Myrian {
   rust: Record<string, boolean>;
 }
 
-export const distance = (a: Device, b: Device) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-export const distanceCoord2D = (a: Device, coord: [number, number]) =>
-  Math.abs(a.x - coord[0]) + Math.abs(a.y - coord[1]);
+export const myrianSize = 12;
 
-export const adjacent = (a: Device, b: Device) => distance(a, b) === 1;
-export const adjacentCoord2D = (a: Device, coord: [number, number]) => distanceCoord2D(a, coord) === 1;
+const defaultGlitches = Object.values(Glitch).reduce((acc, g) => ({ ...acc, [g]: 0 }), {}) as Record<Glitch, number>;
 
-export const inventoryMatches = (a: Component[], b: Component[]) => {
-  if (a.length != b.length) return false;
-  return a.every((i) => b.includes(i));
+export const myrian: Myrian = {
+  vulns: 0,
+  totalVulns: 0,
+  devices: [],
+  glitches: { ...defaultGlitches },
+  rust: {},
+};
+
+export const loadMyrian = (save: string) => {
+  resetMyrian();
+  startRoaming();
+  startRust();
+  startSegmentation();
+  if (!save) return;
+  //   const savedMyrian = JSON.parse(save);
+  //   Object.assign(myrian, savedMyrian);
 };
 
 export const inMyrianBounds = (x: number, y: number) => x >= 0 && x < myrianSize && y >= 0 && y < myrianSize;
-
-export const vulnsMap: Record<Component, number> = {
-  // tier 0
-  [Component.R0]: 1,
-  [Component.G0]: 1,
-  [Component.B0]: 1,
-
-  // tier 1
-  [Component.R1]: 4,
-  [Component.G1]: 4,
-  [Component.B1]: 4,
-
-  [Component.Y1]: 4,
-  [Component.C1]: 4,
-  [Component.M1]: 4,
-
-  // tier 2
-  [Component.R2]: 16,
-  [Component.G2]: 16,
-  [Component.B2]: 16,
-
-  [Component.Y2]: 16,
-  [Component.C2]: 16,
-  [Component.M2]: 16,
-
-  [Component.W2]: 16,
-
-  // tier 3
-  [Component.R3]: 64,
-  [Component.G3]: 64,
-  [Component.B3]: 64,
-
-  [Component.Y3]: 64,
-  [Component.C3]: 64,
-  [Component.M3]: 64,
-
-  [Component.W3]: 64,
-
-  // tier 4
-  [Component.R4]: 256,
-  [Component.G4]: 256,
-  [Component.B4]: 256,
-
-  [Component.Y4]: 256,
-  [Component.C4]: 256,
-  [Component.M4]: 256,
-
-  [Component.W4]: 256,
-
-  // tier 5
-  [Component.R5]: 1024,
-  [Component.G5]: 1024,
-  [Component.B5]: 1024,
-
-  [Component.Y5]: 1024,
-  [Component.C5]: 1024,
-  [Component.M5]: 1024,
-
-  [Component.W5]: 1024,
-
-  // tier 6
-  [Component.Y6]: 4096,
-  [Component.C6]: 4096,
-  [Component.M6]: 4096,
-
-  [Component.W6]: 4096,
-
-  // tier 7
-  [Component.W7]: 16384,
-};
-
-export const isDeviceContainer = (device: BaseDevice): device is ContainerDevice => "content" in device;
-
-export const isDeviceBus = (d: Device): d is Bus => d.type === DeviceType.Bus;
-export const isDeviceISocket = (d: Device): d is ISocket => d.type === DeviceType.ISocket;
-export const isDeviceOSocket = (d: Device): d is OSocket => d.type === DeviceType.OSocket;
-export const isDeviceReducer = (d: Device): d is Reducer => d.type === DeviceType.Reducer;
-export const isDeviceCache = (d: Device): d is Cache => d.type === DeviceType.Cache;
-export const isDeviceLock = (d: Device): d is Lock => d.type === DeviceType.Lock;
-export const isDeviceBattery = (d: Device): d is Battery => d.type === DeviceType.Battery;
 
 export const findDevice = (id: DeviceID, type?: DeviceType): Device | undefined =>
   myrian.devices.find(
@@ -136,16 +55,28 @@ export const getTotalGlitchMult = () =>
     return acc * glitchMult(glitch as Glitch, lvl);
   }, 1);
 
-// DO NOT use `Object.keys` on a Rustable because it will return way more than just the rustable stats.
-const rustStats: (keyof Rustable)[] = ["moveLvl", "transferLvl", "reduceLvl", "installLvl", "maxEnergy"];
-type Rustable = Pick<Bus, "moveLvl" | "transferLvl" | "reduceLvl" | "installLvl" | "maxEnergy">;
+export const getNextOSocketRequest = (tier: number) => {
+  const potential = componentTiers.slice(0, tier + 1).flat();
+  return new Array(Math.floor(Math.pow(Math.random() * tier, 0.75) + 1)).fill(null).map(() => pickOne(potential));
+};
 
-export const rustBus = (bus: Bus, rust: number) => {
-  const rustable = bus as Rustable;
-  const nonZero = rustStats.filter((stat) => rustable[stat] > 0);
-  const chosen = pickOne(nonZero);
-  rustable[chosen] = Math.max(0, rustable[chosen] - rust * 0.1);
+export const countDevices = (type: DeviceType) =>
+  myrian.devices.reduce((acc, d) => (d.type === type ? acc + 1 : acc), 0);
 
-  // cap energy when maxEnergy is reduced
-  bus.energy = Math.min(bus.energy, bus.maxEnergy);
+export const resetMyrian = () => {
+  myrian.vulns = 0;
+  myrian.totalVulns = 0;
+  myrian.devices = [];
+  myrian.glitches = { ...defaultGlitches };
+  myrian.rust = {};
+
+  NewBus("alice", Math.floor(myrianSize / 2), Math.floor(myrianSize / 2));
+
+  NewISocket("isocket0", Math.floor(myrianSize / 4), 0, Component.R0);
+  NewISocket("isocket1", Math.floor(myrianSize / 2), 0, Component.G0);
+  NewISocket("isocket2", Math.floor((myrianSize * 3) / 4), 0, Component.B0);
+
+  NewOSocket("osocket0", Math.floor(myrianSize / 4), Math.floor(myrianSize - 1));
+  NewOSocket("osocket1", Math.floor(myrianSize / 2), Math.floor(myrianSize - 1));
+  NewOSocket("osocket2", Math.floor((myrianSize * 3) / 4), Math.floor(myrianSize - 1));
 };
