@@ -1,10 +1,11 @@
 import { DeviceType } from "@nsdefs";
 import { myrian } from "../Helper";
 import { componentTiers } from "./components";
+import { pickOne } from "../utils";
 
-export type FactoryFormulaParams = [number, number, number, number];
+type FactoryFormulaParams = [number, number, number, number];
 
-export const maxContentScale: Record<DeviceType, FactoryFormulaParams> = {
+const maxContentScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [8, 0.5, 2, 0],
   [DeviceType.ISocket]: [4, 1, 5, 0],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -20,16 +21,9 @@ const exp = (p: FactoryFormulaParams, x: number): number => Math.pow(p[0], p[1] 
 export const upgradeMaxContentCost = (type: DeviceType, currentMaxContent: number): number =>
   exp(maxContentScale[type], currentMaxContent);
 
-export const busPrice = (currentBusses: number): number => Math.pow(2, currentBusses + 3);
-export const moveSpeed = (level: number) => 1000 / (level + 10);
-export const reduceSpeed = (level: number) => 50000 / (level + 10);
-export const transferSpeed = (level: number) => 1000 / (level + 10);
-export const installSpeed = (level: number) => 100000 / (level + 10);
-export const isocketSpeed = (level: number) => 100000 / (level + 10);
-
 const countDevices = (type: DeviceType) => myrian.devices.reduce((acc, d) => (d.type === type ? acc + 1 : acc), 0);
 
-export const deviceScale: Record<DeviceType, FactoryFormulaParams> = {
+const deviceScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [4, 0.5, 2, 0],
   [DeviceType.ISocket]: [2, 1, 4, 0],
   [DeviceType.OSocket]: [4, 1, 3, 0],
@@ -44,12 +38,10 @@ export const deviceCost = (type: DeviceType, count?: number) =>
 
 export const getNextISocketRequest = (tier: number) => {
   const potential = componentTiers.slice(0, tier + 1).flat();
-  return new Array(Math.floor(Math.pow(Math.random() * tier, 0.75) + 1))
-    .fill(null)
-    .map(() => potential[Math.floor(Math.random() * potential.length)]);
+  return new Array(Math.floor(Math.pow(Math.random() * tier, 0.75) + 1)).fill(null).map(() => pickOne(potential));
 };
 
-export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
+const tierScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -61,7 +53,7 @@ export const tierScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const tierCost = (type: DeviceType, tier: number) => exp(tierScale[type], tier);
 
-export const emissionScale: Record<DeviceType, FactoryFormulaParams> = {
+const emissionScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.ISocket]: [2, 1, 3, 0],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -73,7 +65,7 @@ export const emissionScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const emissionCost = (type: DeviceType, emissionLvl: number) => exp(emissionScale[type], emissionLvl);
 
-export const moveLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+const moveLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [2, 1, 3, 0],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -85,7 +77,7 @@ export const moveLvlScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const moveLvlCost = (type: DeviceType, moveLvl: number) => exp(moveLvlScale[type], moveLvl);
 
-export const transferLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+const transferLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [2, 1, 3, 0],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -97,7 +89,7 @@ export const transferLvlScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const transferLvlCost = (type: DeviceType, transferLvl: number) => exp(transferLvlScale[type], transferLvl);
 
-export const reduceLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+const reduceLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [2, 1, 3, 0],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -109,7 +101,7 @@ export const reduceLvlScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const reduceLvlCost = (type: DeviceType, reduceLvl: number) => exp(reduceLvlScale[type], reduceLvl);
 
-export const installLvlScale: Record<DeviceType, FactoryFormulaParams> = {
+const installLvlScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [2, 1, 3, 0],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -121,7 +113,7 @@ export const installLvlScale: Record<DeviceType, FactoryFormulaParams> = {
 
 export const installLvlCost = (type: DeviceType, installLvl: number) => exp(installLvlScale[type], installLvl);
 
-export const maxEnergyScale: Record<DeviceType, FactoryFormulaParams> = {
+const maxEnergyScale: Record<DeviceType, FactoryFormulaParams> = {
   [DeviceType.Bus]: [2, 1, 3, 0],
   [DeviceType.ISocket]: [Infinity, Infinity, Infinity, Infinity],
   [DeviceType.OSocket]: [Infinity, Infinity, Infinity, Infinity],
@@ -132,19 +124,3 @@ export const maxEnergyScale: Record<DeviceType, FactoryFormulaParams> = {
 };
 
 export const maxEnergyCost = (type: DeviceType, maxEnergy: number) => exp(maxEnergyScale[type], maxEnergy);
-
-/**
-glitches:
-
-- random walls (higher level more randomly spawning walls, level 0 is no walls)
-- moving dock & dispensers (higher level move faster, level 0 does not move)
-- dock complexity (higher level more complex, level 0 is repeating request)
-- energy consumption (higher level consume more, level 0 is no consumption)
-- ugrade degradation (hidden tile degrade upgrades, level 0 does not degrade)
-- move hinderance (speed) (higher level slower, level 0 is no hinderance)
-- connection hinderance (transfer / charge) (higher level slower, level 0 is immediate transfer speed and charge)
-- allocation hinderance (craft & build) (higher level slower, level 0 is no hinderance)
-
-
-special requests like "has red" that increases the reward
-*/

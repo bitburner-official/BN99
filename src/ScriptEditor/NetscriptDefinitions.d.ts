@@ -5410,6 +5410,12 @@ interface Myrian {
   uninstallDevice(bus: DeviceID, coord: [number, number]): Promise<boolean>;
 
   /**
+   * Rename a device, no 2 entity can have the same name
+   * @returns true if the rename succeeded, false otherwise.
+   */
+  renameDevice(device: DeviceID, name: string): boolean;
+
+  /**
    * Upgrade the max content of a device
    * @remarks
    * RAM cost: 0 GB

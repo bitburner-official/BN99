@@ -31,16 +31,11 @@ import {
   emissionCost,
   getNextISocketRequest,
   installLvlCost,
-  installSpeed,
-  isocketSpeed,
   maxEnergyCost,
   moveLvlCost,
-  moveSpeed,
   reduceLvlCost,
-  reduceSpeed,
   tierCost,
   transferLvlCost,
-  transferSpeed,
   upgradeMaxContentCost,
 } from "../Myrian/formulas/formulas";
 import { recipes } from "../Myrian/formulas/recipes";
@@ -54,6 +49,8 @@ import {
   magnetismLoss,
   virtualizationMult,
 } from "../Myrian/formulas/glitches";
+import { pickOne } from "../Myrian/utils";
+import { installSpeed, isocketSpeed, moveSpeed, reduceSpeed, transferSpeed } from "../Myrian/formulas/speed";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
@@ -70,6 +67,15 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
     },
     getDevices: (__ctx) => () => JSON.parse(JSON.stringify(myrian.devices)),
     getVulns: () => () => myrian.vulns,
+    renameDevice: (ctx) => (_id, _name) => {
+      const id = helpers.deviceID(ctx, "id", _id);
+      const name = helpers.string(ctx, "name", _name);
+      const device = findDevice(id);
+      if (!device) return false;
+      if (findDevice(name)) return false;
+      device.name = name;
+      return true;
+    },
     moveBus:
       (ctx) =>
       async (_bus, _coord): Promise<boolean> => {
@@ -101,7 +107,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        const outOfEnergy = bus.energy === 0 ? 0.5 : 1;
+        const outOfEnergy = bus.energy === 0 ? 0.1 : 1;
 
         bus.isBusy = true;
         return helpers
@@ -472,7 +478,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
               break;
             }
             case DeviceType.ISocket: {
-              NewISocket(name, x, y, componentTiers[0][Math.floor(Math.random() * componentTiers[0].length)]);
+              NewISocket(name, x, y, pickOne(componentTiers[0]));
               break;
             }
             case DeviceType.OSocket: {
