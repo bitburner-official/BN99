@@ -1,4 +1,3 @@
-import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery, ISocket } from "@nsdefs";
 import { InternalAPI } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import {
@@ -53,6 +52,7 @@ import {
 import { installSpeed, emissionSpeed, moveSpeed, reduceSpeed, transferSpeed } from "../Myrian/formulas/speed";
 import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "../Myrian/NewDevices";
 import { rustBus } from "../Myrian/glitches/rust";
+import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery, ISocket } from "@nsdefs";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {

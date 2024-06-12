@@ -2,7 +2,7 @@ import { Device, DeviceType, Component, DeviceID, Glitch } from "@nsdefs";
 import { glitchMult } from "./formulas/glitches";
 import { isDeviceISocket, pickOne } from "./utils";
 import { componentTiers } from "./formulas/components";
-import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "./NewDevices";
+import { NewBus, NewISocket, NewOSocket } from "./NewDevices";
 import { startRoaming } from "./glitches/roaming";
 import { startRust } from "./glitches/rust";
 import { startSegmentation } from "./glitches/segmentation";
