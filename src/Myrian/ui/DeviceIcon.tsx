@@ -1,5 +1,6 @@
 import React from "react";
-import { Device, DeviceType } from "@nsdefs";
+import { Device } from "@nsdefs";
+import { DeviceType } from "@enums";
 
 import { BusIcon } from "./BusIcon";
 import { ReducerIcon } from "./Reducer";
@@ -8,26 +9,27 @@ import { CacheIcon } from "./CacheIcon";
 import { BatteryIcon } from "./BatteryIcon";
 import { OSocketIcon } from "./OSocketIcon";
 import { ISocketIcon } from "./ISocketIcon";
+import {
+  isDeviceBattery,
+  isDeviceBus,
+  isDeviceCache,
+  isDeviceISocket,
+  isDeviceLock,
+  isDeviceOSocket,
+  isDeviceReducer,
+} from "../utils";
 
 interface IDeviceIconProps {
   device: Device;
 }
 
 export const DeviceIcon = ({ device }: IDeviceIconProps): React.ReactElement => {
-  switch (device.type) {
-    case DeviceType.ISocket:
-      return <ISocketIcon socket={device} />;
-    case DeviceType.OSocket:
-      return <OSocketIcon socket={device} />;
-    case DeviceType.Bus:
-      return <BusIcon bus={device} />;
-    case DeviceType.Reducer:
-      return <ReducerIcon reducer={device} />;
-    case DeviceType.Lock:
-      return <LockIcon lock={device} />;
-    case DeviceType.Cache:
-      return <CacheIcon cache={device} />;
-    case DeviceType.Battery:
-      return <BatteryIcon battery={device} />;
-  }
+  if (isDeviceISocket(device)) return <ISocketIcon socket={device} />;
+  if (isDeviceOSocket(device)) return <OSocketIcon socket={device} />;
+  if (isDeviceBus(device)) return <BusIcon bus={device} />;
+  if (isDeviceReducer(device)) return <ReducerIcon reducer={device} />;
+  if (isDeviceLock(device)) return <LockIcon lock={device} />;
+  if (isDeviceCache(device)) return <CacheIcon cache={device} />;
+  if (isDeviceBattery(device)) return <BatteryIcon battery={device} />;
+  return <></>;
 };

@@ -1,4 +1,4 @@
-import { DeviceType } from "@nsdefs";
+import { DeviceType } from "@enums";
 
 // parameters for a exponential formula, a^(b*X+c)+d
 type ExponentialFormulaParams = [number, number, number, number];

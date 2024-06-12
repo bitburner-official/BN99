@@ -1,10 +1,8 @@
 import {
-  Component,
   BaseDevice,
   ContainerDevice,
   Device,
   Bus,
-  DeviceType,
   ISocket,
   OSocket,
   Reducer,
@@ -14,6 +12,7 @@ import {
   TieredDevice,
   EnergyDevice,
 } from "@nsdefs";
+import { Component, DeviceType } from "@enums";
 
 export const pickOne = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 

@@ -1,4 +1,4 @@
-import { Component } from "@nsdefs";
+import { Component } from "@enums";
 
 export const cellSize = 48;
 

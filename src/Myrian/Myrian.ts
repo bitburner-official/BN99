@@ -1,4 +1,5 @@
-import { Device, DeviceType, Component, DeviceID, Glitch } from "@nsdefs";
+import { Device, DeviceID } from "@nsdefs";
+import { DeviceType, Component, Glitch } from "@enums";
 import { glitchMult } from "./formulas/glitches";
 import { isDeviceISocket, pickOne } from "./utils";
 import { componentTiers } from "./formulas/components";

@@ -1,4 +1,4 @@
-import { Component } from "@nsdefs";
+import { Component } from "@enums";
 
 export const componentTiers = [
   [Component.R0, Component.G0, Component.B0],

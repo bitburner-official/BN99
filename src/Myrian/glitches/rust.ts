@@ -1,4 +1,5 @@
-import { Bus, Glitch } from "@nsdefs";
+import { Bus } from "@nsdefs";
+import { Glitch } from "@enums";
 import { myrian, myrianSize } from "../Myrian";
 import { pickOne } from "../utils";
 

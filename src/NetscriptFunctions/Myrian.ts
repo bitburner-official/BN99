@@ -40,6 +40,8 @@ import {
   inventoryMatches,
   isDeviceBus,
   isDeviceContainer,
+  isDeviceISocket,
+  isDeviceOSocket,
   isDeviceTiered,
   isEmittingDevice,
   isEnergyDevice,
@@ -52,7 +54,8 @@ import {
 import { installSpeed, emissionSpeed, moveSpeed, reduceSpeed, transferSpeed } from "../Myrian/formulas/speed";
 import { NewBattery, NewBus, NewCache, NewISocket, NewLock, NewOSocket, NewReducer } from "../Myrian/NewDevices";
 import { rustBus } from "../Myrian/glitches/rust";
-import { Bus, Myrian as IMyrian, DeviceType, Component, Reducer, Glitch, Battery, ISocket } from "@nsdefs";
+import { Bus, Myrian as IMyrian, Reducer, Battery, ISocket } from "@nsdefs";
+import { DeviceType, Component, Glitch } from "@enums";
 
 export function NetscriptMyrian(): InternalAPI<IMyrian> {
   return {
@@ -109,7 +112,7 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           return Promise.resolve(false);
         }
 
-        const outOfEnergy = bus.energy === 0 ? 0.1 : 1;
+        const outOfEnergy = bus.energy === 0 ? 10 : 1;
 
         bus.isBusy = true;
         return helpers
@@ -208,28 +211,21 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             fromDevice.content = fromDevice.content.filter((item) => !input.includes(item));
             fromDevice.content.push(...output);
 
-            switch (container.type) {
-              case DeviceType.ISocket: {
-                if (previousSize <= container.content.length) break;
-                const cooldown = emissionSpeed(container.emissionLvl);
-                container.cooldownUntil = Date.now() + cooldown;
-                setTimeout(() => {
-                  container.content = new Array(container.maxContent).fill(container.emitting);
-                }, cooldown);
-                break;
-              }
-
-              case DeviceType.OSocket: {
-                if (!inventoryMatches(container.currentRequest, container.content)) break;
-                const gain = contentVulnsValue(container.content) * getTotalGlitchMult();
-                myrian.vulns += gain;
-                myrian.totalVulns += gain;
-                container.content = [];
-                const request = getNextOSocketRequest(myrian.glitches[Glitch.Encryption]);
-                container.currentRequest = request;
-                container.maxContent = request.length;
-                break;
-              }
+            if (isDeviceISocket(container) && previousSize > container.content.length) {
+              const cooldown = emissionSpeed(container.emissionLvl);
+              container.cooldownUntil = Date.now() + cooldown;
+              setTimeout(() => {
+                container.content = new Array(container.maxContent).fill(container.emitting);
+              }, cooldown);
+            }
+            if (isDeviceOSocket(container) && inventoryMatches(container.currentRequest, container.content)) {
+              const gain = contentVulnsValue(container.content) * getTotalGlitchMult();
+              myrian.vulns += gain;
+              myrian.totalVulns += gain;
+              container.content = [];
+              const request = getNextOSocketRequest(myrian.glitches[Glitch.Encryption]);
+              container.currentRequest = request;
+              container.maxContent = request.length;
             }
             return Promise.resolve(true);
           })

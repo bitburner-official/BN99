@@ -1,5 +1,5 @@
 import React from "react";
-import { Component } from "@nsdefs";
+import { Component } from "@enums";
 import { getComponentColor } from "./common";
 
 interface IComponent {

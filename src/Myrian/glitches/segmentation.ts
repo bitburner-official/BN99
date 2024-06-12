@@ -1,4 +1,4 @@
-import { Glitch } from "@nsdefs";
+import { Glitch } from "@enums";
 import { myrian, myrianSize } from "../Myrian";
 import { findDevice } from "../Myrian";
 import { NewLock } from "../NewDevices";

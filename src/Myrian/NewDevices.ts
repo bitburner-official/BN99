@@ -1,4 +1,5 @@
-import { Battery, Bus, Cache, Component, DeviceType, ISocket, Lock, OSocket, Reducer } from "@nsdefs";
+import { Battery, Bus, Cache, ISocket, Lock, OSocket, Reducer } from "@nsdefs";
+import { Component, DeviceType } from "@enums";
 import { myrian } from "./Myrian";
 import { getNextOSocketRequest } from "./Myrian";
 

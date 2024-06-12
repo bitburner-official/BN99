@@ -1,4 +1,4 @@
-import { DeviceType, Glitch } from "@nsdefs";
+import { DeviceType, Glitch } from "@enums";
 import { myrian, myrianSize } from "../Myrian";
 import { findDevice, inMyrianBounds } from "../Myrian";
 import { roamingTime } from "../formulas/glitches";

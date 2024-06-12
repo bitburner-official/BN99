@@ -1,4 +1,4 @@
-import { Glitch } from "@nsdefs";
+import { Glitch } from "@enums";
 
 export const glitchMaxLvl: Record<Glitch, number> = {
   [Glitch.Segmentation]: 10,

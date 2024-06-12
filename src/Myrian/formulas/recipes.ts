@@ -1,4 +1,5 @@
-import { Component, Recipe } from "@nsdefs";
+import { Recipe } from "@nsdefs";
+import { Component } from "@enums";
 
 const make = (input: Component[], output: Component): Recipe => ({ input, output });
 
