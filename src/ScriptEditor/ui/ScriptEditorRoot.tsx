@@ -143,6 +143,7 @@ function Root(props: IProps): React.ReactElement {
     infLoop(newCode);
     updateRAM(
       !currentScript || currentScript.isTxt ? null : newCode,
+      currentScript && currentScript.path,
       currentScript && GetServer(currentScript.hostname),
     );
     finishUpdatingRAM();
@@ -372,7 +373,7 @@ function Root(props: IProps): React.ReactElement {
     }
   }
 
-  const { VimStatus } = useVimEditor({
+  const { statusBarRef } = useVimEditor({
     editor: editorRef.current,
     vim: options.vim,
     onSave: save,
@@ -410,7 +411,7 @@ function Root(props: IProps): React.ReactElement {
         <div style={{ flex: "0 0 5px" }} />
         <Editor onMount={onMount} onChange={updateCode} onUnmount={onUnmountEditor} />
 
-        {VimStatus}
+        {statusBarRef.current}
 
         <Toolbar onSave={save} editor={editorRef.current} />
       </div>
