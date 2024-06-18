@@ -183,16 +183,37 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           helpers.log(ctx, () => "not enough space in one of the containers");
           return Promise.resolve(false);
         }
-
-        const fromHas = input.every((item) => fromDevice.content.includes(item));
-        const toHas = output.every((item) => toDevice.content.includes(item));
-        if (!fromHas || !toHas) {
-          helpers.log(ctx, () => "one of the entities does not have the items");
+        if (fromDevice.isBusy || toDevice.isBusy) {
+          helpers.log(ctx, () => "one of the entities is busy");
           return Promise.resolve(false);
         }
 
-        if (fromDevice.isBusy || toDevice.isBusy) {
-          helpers.log(ctx, () => "one of the entities is busy");
+        const fromContentMap = fromDevice.content.reduce(
+          (acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }),
+          {} as Record<Component, number>,
+        );
+        const toContentMap = toDevice.content.reduce(
+          (acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }),
+          {} as Record<Component, number>,
+        );
+
+        const inputContentMap = input.reduce(
+          (acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }),
+          {} as Record<Component, number>,
+        );
+        const outputContentMap = output.reduce(
+          (acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }),
+          {} as Record<Component, number>,
+        );
+
+        const fromHas = (Object.keys(inputContentMap) as Component[]).every(
+          (k) => fromContentMap[k] >= inputContentMap[k],
+        );
+        const toHas = (Object.keys(outputContentMap) as Component[]).every(
+          (k) => toContentMap[k] >= outputContentMap[k],
+        );
+        if (!fromHas || !toHas) {
+          helpers.log(ctx, () => "one of the entities does not have the items");
           return Promise.resolve(false);
         }
 
@@ -205,11 +226,22 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
           .netscriptDelay(ctx, transferSpeed(bus.transferLvl) * isolationMult(myrian.glitches[Glitch.Isolation]), true)
           .then(() => {
             const previousSize = container.content.length;
-            toDevice.content = toDevice.content.filter((item) => !output.includes(item));
-            toDevice.content.push(...input);
 
-            fromDevice.content = fromDevice.content.filter((item) => !input.includes(item));
-            fromDevice.content.push(...output);
+            (Object.keys(inputContentMap) as Component[]).forEach((k) => {
+              fromContentMap[k] = (fromContentMap[k] ?? 0) - inputContentMap[k];
+              toContentMap[k] = (toContentMap[k] ?? 0) + inputContentMap[k];
+            });
+            (Object.keys(outputContentMap) as Component[]).forEach((k) => {
+              toContentMap[k] = (toContentMap[k] ?? 0) - outputContentMap[k];
+              fromContentMap[k] = (fromContentMap[k] ?? 0) + outputContentMap[k];
+            });
+            toDevice.content = (Object.keys(toContentMap) as Component[])
+              .map((k) => new Array(toContentMap[k]).fill(k))
+              .flat();
+
+            fromDevice.content = (Object.keys(fromContentMap) as Component[])
+              .map((k) => new Array(fromContentMap[k]).fill(k))
+              .flat();
 
             if (isDeviceISocket(container) && previousSize > container.content.length) {
               const cooldown = emissionSpeed(container.emissionLvl);
