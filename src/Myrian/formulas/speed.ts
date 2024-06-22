@@ -5,7 +5,7 @@ export const moveSpeed = (level: number) => 1000 / (level + 10);
 export const reduceSpeed = (level: number) => 50000 / (level + 10);
 
 // speed to transfer components between devices
-export const transferSpeed = (level: number) => 1000 / (level + 10);
+export const transferSpeed = (level: number) => 4000 / (level + 10);
 
 // speed to install / uninstall devices and tweak ISockets
 export const installSpeed = (level: number) => 100000 / (level + 10);

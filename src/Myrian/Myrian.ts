@@ -7,6 +7,7 @@ import { NewBus, NewISocket, NewOSocket } from "./NewDevices";
 import { startRoaming } from "./glitches/roaming";
 import { startRust } from "./glitches/rust";
 import { startSegmentation } from "./glitches/segmentation";
+import { startBattery } from "./glitches/battery";
 
 export interface Myrian {
   vulns: number;
@@ -33,6 +34,7 @@ export const loadMyrian = (save: string) => {
   startRoaming();
   startRust();
   startSegmentation();
+  startBattery();
   if (!save) return;
   const savedMyrian = JSON.parse(save);
   Object.assign(myrian, savedMyrian);

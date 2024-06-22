@@ -5376,6 +5376,12 @@ interface Myrian {
   moveBus(bus: DeviceID, coord: [number, number]): Promise<boolean>;
 
   /**
+   * Delete the entire content of a device, typically used for debugging.
+   * @returns true if the formatting succeeded, false otherwise.
+   */
+  formatContent(device: DeviceID): boolean;
+
+  /**
    * Transfer components between devices, one of them must be a bus.
    * @remarks
    * RAM cost: 0 GB

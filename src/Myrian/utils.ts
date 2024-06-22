@@ -23,9 +23,17 @@ export const distanceCoord2D = (a: Device, coord: [number, number]) =>
 export const adjacent = (a: Device, b: Device) => distance(a, b) === 1;
 export const adjacentCoord2D = (a: Device, coord: [number, number]) => distanceCoord2D(a, coord) === 1;
 
+export const makeContentMap = (content: Component[]) =>
+  content.reduce((acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }), {} as Record<Component, number>);
+
 export const inventoryMatches = (a: Component[], b: Component[]) => {
-  if (a.length != b.length) return false;
-  return a.every((i) => b.includes(i));
+  const aMap = makeContentMap(a);
+  const bMap = makeContentMap(b);
+
+  return (
+    (Object.keys(aMap) as Component[]).every((k) => aMap[k] === bMap[k]) &&
+    Object.keys(aMap).length === Object.keys(aMap).length
+  );
 };
 
 const vulnsMap: Record<Component, number> = {

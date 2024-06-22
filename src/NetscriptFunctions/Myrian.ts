@@ -137,6 +137,32 @@ export function NetscriptMyrian(): InternalAPI<IMyrian> {
             bus.isBusy = false;
           });
       },
+    formatContent: (ctx) => (_device) => {
+      const deviceID = helpers.deviceID(ctx, "device", _device);
+
+      const device = findDevice(deviceID);
+      if (!device) {
+        helpers.log(ctx, () => `device ${deviceID} not found`);
+        return false;
+      }
+
+      if (!isDeviceContainer(device)) {
+        helpers.log(ctx, () => `device ${deviceID} is not a container`);
+        return false;
+      }
+
+      device.content = [];
+
+      if (isDeviceISocket(device)) {
+        const cooldown = emissionSpeed(device.emissionLvl);
+        device.cooldownUntil = Date.now() + cooldown;
+        setTimeout(() => {
+          device.content = new Array(device.maxContent).fill(device.emitting);
+        }, cooldown);
+      }
+
+      return true;
+    },
     transfer:
       (ctx) =>
       async (_from, _to, _input, _output): Promise<boolean> => {

@@ -28,16 +28,16 @@ export const giltchMultCoefficients: Record<Glitch, number> = {
 export const glitchMult = (glitch: Glitch, lvl: number) => 1 + lvl * giltchMultCoefficients[glitch];
 
 // move hinderance
-export const frictionMult = (lvl: number) => Math.pow(1.25, lvl);
+export const frictionMult = (lvl: number) => Math.pow(2.5, lvl);
 
 // transfer slow down
-export const isolationMult = (lvl: number) => Math.pow(2, lvl);
+export const isolationMult = (lvl: number) => Math.pow(8, lvl);
 
 // install/uninstall slow down
-export const virtualizationMult = (lvl: number) => Math.pow(3, lvl);
+export const virtualizationMult = (lvl: number) => Math.pow(5, lvl);
 
 // reduce slow down
-export const jammingMult = (lvl: number) => Math.pow(1.3, lvl);
+export const jammingMult = (lvl: number) => Math.pow(2.5, lvl);
 
 // energy loss
 export const magnetismLoss = (lvl: number) => lvl;

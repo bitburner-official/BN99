@@ -23,7 +23,7 @@ const makeExpFunction = (p: Partial<DeviceScale>) => {
 export const upgradeMaxContentCost = makeExpFunction({
   [DeviceType.Bus]: [8, 0.5, 2, 0],
   [DeviceType.ISocket]: [4, 1, 5, 0],
-  [DeviceType.Reducer]: [Infinity, 1, -1, 4095],
+  [DeviceType.Reducer]: [256, 1, -3, 512],
   [DeviceType.Cache]: [1.2, 10, 0, 63],
 });
 
@@ -53,15 +53,15 @@ export const upgradeInstallLvlCost = makeExpFunction({
 });
 
 export const upgradeMaxEnergyCost = makeExpFunction({
-  [DeviceType.Bus]: [2, 1, 3, 0],
-  [DeviceType.Battery]: [1.1, 1, 3, 8],
+  [DeviceType.Bus]: [1.1, 1, -8, 16],
+  [DeviceType.Battery]: [1.1, 1, -16, 8],
 });
 
 export const installDeviceCost = makeExpFunction({
   [DeviceType.Bus]: [4, 0.5, 2, 0],
   [DeviceType.ISocket]: [2, 1, 4, 0],
   [DeviceType.OSocket]: [4, 1, 3, 0],
-  [DeviceType.Reducer]: [1.5, 1, 2, 0],
-  [DeviceType.Cache]: [1.2, 10, 0, 63],
+  [DeviceType.Reducer]: [5, 0.5, 1, 0],
+  [DeviceType.Cache]: [1.2, 5, 0, 18],
   [DeviceType.Battery]: [1.2, 10, 0, 63],
 });
